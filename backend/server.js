@@ -8,8 +8,8 @@ import mysql from "mysql2/promise";
 import winston from "winston";
 import expressWinston from "express-winston";
 import session from "express-session";
-import { default as RedisStore } from "connect-redis";
-import { createClient } from "redis";
+// import { default as RedisStore } from "connect-redis";
+// import { createClient } from "redis";
 import { validationResult } from "express-validator";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -70,8 +70,8 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true, 
-    preflightContinue: false, 
+    credentials: true,
+    preflightContinue: false,
   })
 );
 
@@ -174,12 +174,12 @@ const validateRequest = (validations) => {
 
 // --- MIDDLEWARE SESSION ---
 
-const redisClient = createClient();
-redisClient.connect().catch(console.error);
+// const redisClient = createClient();
+// redisClient.connect().catch(console.error);
 
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
+    // store: new RedisStore({ client: redisClient }),
     secret: process.env.SECRET_KEY,
     resave: false,
     saveUninitialized: false,
