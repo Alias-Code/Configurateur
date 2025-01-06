@@ -45,7 +45,9 @@ app.use(helmet());
 
 app.set("trust proxy", true);
 
-// --- SÉCURITÉ EXTERNE REQUÊTE ---
+// --- SÉCURITÉ EXTERNE REQUÊTE CORS ---
+
+app.options("*", cors());
 
 app.use(
   cors({
@@ -70,6 +72,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 // --- LIMITE NOMBRE REQUETE ---
 
 const limiter = rateLimit({
