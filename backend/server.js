@@ -128,7 +128,7 @@ const dbPool = mysql.createPool({
     console.log("Connecté à la base de données");
     await connection.query("SELECT 1");
     console.log("Requête réussie, connexion active");
-    connection.release(); // Libérer la connexion après usage
+    connection.release();
   } catch (err) {
     console.error("Erreur de connexion à la base de données :", err.message);
     if (err.code === "ENOTFOUND") {

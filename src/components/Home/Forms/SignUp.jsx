@@ -349,7 +349,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
       };
 
       try {
-        const response = await fetch(`https://configurateur-production.up.railway.app/api/auth/signup`, {
+        const response = await fetch(`https://configurateur-sand.vercel.app//api/auth/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
