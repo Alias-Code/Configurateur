@@ -51,7 +51,7 @@ app.use(
         "http://localhost:3000",
         "https://lumicrea.fr",
         "https://configurateur-sand.vercel.app",
-        "configurateur-production.up.railway.app",
+        "https://configurateur-production.up.railway.app",
       ];
 
       const vercelRegex = /^https:\/\/configurateur(-\w+)?\.vercel\.app$/;
