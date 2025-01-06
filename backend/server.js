@@ -7,7 +7,6 @@ import rateLimit from "express-rate-limit";
 import mysql from "mysql2/promise";
 import winston from "winston";
 import expressWinston from "express-winston";
-import express from "express";
 import session from "express-session";
 import RedisStore from "connect-redis";
 import { createClient } from "redis";
