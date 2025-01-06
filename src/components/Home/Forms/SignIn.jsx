@@ -257,7 +257,7 @@ export default function SignIn({ isSignInOpen, setSignInOpen, setSignUpOpen, mod
     const { email, password } = formData;
 
     try {
-      const response = await fetch(`https://configurateur-sand.vercel.app//api/auth/login`, {
+      const response = await fetch(`https://configurateur-git-main-alias-codes-projects.vercel.app/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
