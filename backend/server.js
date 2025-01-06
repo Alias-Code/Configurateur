@@ -95,28 +95,36 @@ app.use(
 // --- POOL CONNECTION EN CACHE ---
 
 const dbPool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
+  host: process.env.DB_HOST.trim(),
+  user: process.env.DB_USER.trim(),
+  password: process.env.DB_PASSWORD.trim(),
+  database: process.env.DB_NAME.trim(),
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
   connectionLimit: 10,
   queueLimit: 0,
   waitForConnections: true,
 });
 
-dbPool
-  .getConnection()
-  .then((connection) => {
+(async () => {
+  try {
+    const connection = await dbPool.getConnection();
     console.log("Connecté à la base de données");
-    return connection.query("SELECT 1");
-  })
-  .then(() => {
+    await connection.query("SELECT 1");
     console.log("Requête réussie, connexion active");
-  })
-  .catch((err) => {
-    console.error("Erreur de connexion à la base de données :", err);
-  });
+    connection.release(); // Libérer la connexion après usage
+  } catch (err) {
+    console.error("Erreur de connexion à la base de données :", err.message);
+    if (err.code === "ENOTFOUND") {
+      console.error("L'adresse de la base de données est introuvable. Vérifiez la configuration.");
+    } else if (err.code === "ER_ACCESS_DENIED_ERROR") {
+      console.error("Les informations d'identification (utilisateur/mot de passe) sont incorrectes.");
+    } else if (err.code === "ETIMEDOUT") {
+      console.error("La connexion à la base de données a expiré.");
+    } else {
+      console.error("Erreur inconnue :", err);
+    }
+  }
+})();
 
 // --- MIDDLEWARE LOGGING DES REQUÊTES ---
 
