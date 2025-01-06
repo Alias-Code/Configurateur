@@ -81,7 +81,7 @@ export default function Informations({ formData, setFormData, setCheckoutAnimati
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:3000/api/user/getuseraddress", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -89,7 +89,7 @@ export default function Commandes() {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:3000/api/order/getorders", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/getorders`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -256,7 +256,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:3000/api/address/getuseraddress", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -336,7 +336,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
       setLoading(true);
 
       try {
-        const response = await fetch("http://localhost:3000/api/order/checkout", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/checkout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

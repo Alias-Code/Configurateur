@@ -102,7 +102,7 @@ export default function TableauDeBord() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("http://localhost:3000/api/user/getuserdetails", {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/getuserdetails`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,

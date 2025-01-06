@@ -242,7 +242,7 @@ export default function AddressForm({
     const typeOfAddress = type === "unsync-shipping" && useForBilling ? "sync" : type;
 
     try {
-      const response = await fetch("http://localhost:3000/api/address/createuseraddress", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/createuseraddress`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

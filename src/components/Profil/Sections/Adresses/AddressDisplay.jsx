@@ -78,7 +78,7 @@ export default function AddressDisplay({ isCheckout, address, onAddressDeleted, 
       if (!token) return;
 
       try {
-        const response = await fetch("http://localhost:3000/api/address/deleteuseraddress", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/deleteuseraddress`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -307,7 +307,7 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
     });
 
     try {
-      const response = await fetch("http://localhost:3000/api/order/generateinvoice", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/generateinvoice`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

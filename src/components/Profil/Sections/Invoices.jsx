@@ -105,7 +105,7 @@ export default function Devis() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/order/getinvoices`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/getinvoices`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

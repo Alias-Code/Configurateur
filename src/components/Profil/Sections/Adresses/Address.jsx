@@ -94,7 +94,7 @@ function Adresses({ isCheckout, checkoutFormData, setCheckoutFormData }) {
     if (!token) return;
 
     try {
-      const response = await fetch("http://localhost:3000/api/address/getuseraddress", {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

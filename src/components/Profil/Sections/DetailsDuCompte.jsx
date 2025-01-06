@@ -191,7 +191,7 @@ export default function DetailsDuCompte() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch("http://localhost:3000/api/user/getuserdetails", {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/getuserdetails`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -229,7 +229,7 @@ export default function DetailsDuCompte() {
 
     if (token) {
       try {
-        const response = await fetch("http://localhost:3000/api/user/updatepassword", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/updatepassword`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -269,7 +269,7 @@ export default function DetailsDuCompte() {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch("http://localhost:3000/api/user/deleteaccount", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/deleteaccount`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
