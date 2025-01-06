@@ -41,6 +41,8 @@ const app = express();
 
 app.use(helmet());
 
+app.set("trust proxy", true);
+
 // --- SÉCURITÉ EXTERNE REQUÊTE ---
 
 app.use(
@@ -71,8 +73,9 @@ app.use(
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  min: 100,
-  message: "Trop de requêtes, veuillez réessayer plus tard",
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
 });
 
 app.use(limiter);
@@ -100,6 +103,7 @@ const dbPool = mysql.createPool({
   password: process.env.DB_PASSWORD.trim(),
   database: process.env.DB_NAME.trim(),
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
+  connectTimeout: 10000,
   connectionLimit: 10,
   queueLimit: 0,
   waitForConnections: true,
