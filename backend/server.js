@@ -7,7 +7,10 @@ import rateLimit from "express-rate-limit";
 import mysql from "mysql2/promise";
 import winston from "winston";
 import expressWinston from "express-winston";
+import express from "express";
 import session from "express-session";
+import RedisStore from "connect-redis";
+import { createClient } from "redis";
 import { validationResult } from "express-validator";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -103,7 +106,7 @@ const dbPool = mysql.createPool({
   password: process.env.DB_PASSWORD.trim(),
   database: process.env.DB_NAME.trim(),
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
-  connectTimeout: 10000,
+  connectTimeout: 20000,
   connectionLimit: 10,
   queueLimit: 0,
   waitForConnections: true,
@@ -165,16 +168,23 @@ const validateRequest = (validations) => {
   };
 };
 
-// --- GOOGLE AUTH ---
+// --- MIDDLEWARE SESSION ---
+
+const redisClient = createClient();
+
+redisClient.connect().catch(console.error);
 
 app.use(
   session({
+    store: new RedisStore({ client: redisClient }),
     secret: process.env.SECRET_KEY,
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
+    saveUninitialized: false,
+    cookie: { secure: process.env.NODE_ENV === "production" ? true : false },
   })
 );
+
+// --- GOOGLE AUTH ---
 
 app.use(passport.initialize());
 app.use(passport.session());
