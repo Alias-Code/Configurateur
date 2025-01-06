@@ -47,7 +47,13 @@ app.set("trust proxy", true);
 
 // --- SÉCURITÉ EXTERNE REQUÊTE CORS ---
 
-app.options("*", cors());
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
+});
 
 app.use(
   cors({
@@ -62,8 +68,8 @@ app.use(
 
       const vercelRegex = /^https:\/\/configurateur(-\w+)?\.vercel\.app$/;
 
-      if (!origin || allowedOrigins.indexOf(origin) !== -1 || vercelRegex.test(origin)) {
-        callback(null, true);
+      if (!origin || allowedOrigins.includes(origin) || vercelRegex.test(origin)) {
+        callback(null, origin);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
@@ -137,6 +143,29 @@ const dbPool = mysql.createPool({
   }
 })();
 
+// --- MIDDLEWARE SESSION ---
+
+// const redisClient = createClient();
+// redisClient.connect().catch(console.error);
+
+app.use(
+  session({
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    },
+  })
+);
+
+// --- GOOGLE AUTH ---
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 // --- MIDDLEWARE LOGGING DES REQUÊTES ---
 
 app.use(
@@ -171,25 +200,6 @@ const validateRequest = (validations) => {
     return res.status(400).json({ errors: errors.array() });
   };
 };
-
-// --- MIDDLEWARE SESSION ---
-
-// const redisClient = createClient();
-// redisClient.connect().catch(console.error);
-
-app.use(
-  session({
-    // store: new RedisStore({ client: redisClient }),
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === "production" ? true : false },
-  })
-);
-// --- GOOGLE AUTH ---
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 // --- DEFINITION DES ROUTES ---
 
