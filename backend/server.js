@@ -53,7 +53,9 @@ app.use(
         "https://configurateur-sand.vercel.app",
       ];
 
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      const vercelRegex = /^https:\/\/configurateur(-\w+)?\.vercel\.app$/;
+
+      if (!origin || allowedOrigins.indexOf(origin) !== -1 || vercelRegex.test(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
