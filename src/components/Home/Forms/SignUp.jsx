@@ -355,6 +355,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
             "Content-Type": "application/json",
           },
           body: JSON.stringify(dataToSend),
+          credentials: "include",
         });
 
         const data = await response.json();
