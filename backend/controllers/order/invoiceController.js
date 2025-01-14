@@ -244,17 +244,15 @@ export const generateInvoice = async (req, res, params) => {
 
     drawText(headerTitle, { font: helveticaBold, size: 12, x: 315, y: height - 70 });
     drawText(dateFr, { font: helveticaBold, size: 12, x: 315, y: height - 85 });
-    drawText(
-      `${user.lastname.toUpperCase()} ${user.firstname.toUpperCase()} ${
-        user.company && `- ${user.company} (${user.siret})`
-      }`,
-      {
-        font: helveticaBold,
-        size: 13,
-        x: 315,
-        y: height - 120,
-      }
-    );
+
+    const company = user.company ? `- ${user.company} (${user.siret})` : "";
+
+    drawText(`${user.lastname.toUpperCase()} ${user.firstname.toUpperCase()} ${company}`, {
+      font: helveticaBold,
+      size: 13,
+      x: 315,
+      y: height - 120,
+    });
     drawText(user.phone, { font: helveticaBold, x: 315, y: height - 145 });
     drawText(user.email, { x: 315, y: height - 155 });
 
@@ -287,26 +285,28 @@ export const generateInvoice = async (req, res, params) => {
 
       // CONFIG IMAGE
 
-      const imageBytes = await fetch(configImageSaver[configIndex])
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Image non accessible");
-          }
-          return res.arrayBuffer();
-        })
-        .catch((error) => {
-          console.error("Erreur de téléchargement de l'image:", error);
-          return null;
+      if (!isHttpCall) {
+        const imageBytes = await fetch(configImageSaver[configIndex])
+          .then((res) => {
+            if (!res.ok) {
+              throw new Error("Image non accessible");
+            }
+            return res.arrayBuffer();
+          })
+          .catch((error) => {
+            console.error("Erreur de téléchargement de l'image:", error);
+            return null;
+          });
+
+        const image = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
+
+        page.drawImage(image, {
+          x: columnPositions.configImage,
+          y: y - 67,
+          width: 75,
+          height: 75,
         });
-
-      const image = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
-
-      page.drawImage(image, {
-        x: columnPositions.configImage,
-        y: y - 67,
-        width: 75,
-        height: 75,
-      });
+      }
 
       // TITLE OF THE CONFIG
       const facadeName = config.facade?.name || "N/A";

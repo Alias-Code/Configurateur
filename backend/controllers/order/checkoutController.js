@@ -4,7 +4,7 @@ import UserAddresses from "../../models/UserAddresses.js";
 import dotenv from "dotenv";
 import { S3 } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-provider-env";
-import { sendCheckoutMail } from "../sendMailController.js";
+import { sendCheckoutMail } from "../mailController.js";
 import { generateInvoice } from "./invoiceController.js";
 
 dotenv.config();
