@@ -5,15 +5,13 @@ export default function InterrupteursBox({ hoveredIndex, index, id }) {
   const addChoice = useAddChoice();
 
   return (
-    <MecanismeBoxStyle visible={hoveredIndex === index}>
-      {/* OPTION VA-ET-VIENT */}
-      <p onClick={() => addChoice(id)}>Va-Et-Vient</p>
-
-      {/* OPTION POUSSOIR */}
-      <p onClick={() => addChoice(id.replace("VV", "P"))}>Poussoir</p>
-
-      {/* OPTION VOLET-ROULANT */}
-      <p onClick={() => addChoice(id.replace("VV", "VR"))}>Volet-Roulant</p>
+    <MecanismeBoxStyle
+      visible={hoveredIndex === index}
+      onClick={(e) => e.stopPropagation()} // Empêche la propagation du clic
+    >
+      <p onClick={() => addChoice(id, "click")}>Va-Et-Vient</p>
+      <p onClick={() => addChoice(id.replace("VV", "P"), "click")}>Poussoir</p>
+      <p onClick={() => addChoice(id.replace("VV", "VR"), "click")}>Volet-Roulant</p>
     </MecanismeBoxStyle>
   );
 }

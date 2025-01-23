@@ -1,4 +1,4 @@
-import Steps from "../configuration/config-side/StepContainer";
+import Steps from "../configuration/config-side/Step";
 
 export default function Mecanismes() {
   return (

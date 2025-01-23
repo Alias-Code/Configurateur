@@ -1,22 +1,20 @@
-import passport from "passport";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import helmet from "helmet";
-import cors from "cors";
 import rateLimit from "express-rate-limit";
-import mysql from "mysql2/promise";
-import winston from "winston";
-import expressWinston from "express-winston";
 import session from "express-session";
-// import { default as RedisStore } from "connect-redis";
-// import { createClient } from "redis";
+import expressWinston from "express-winston";
+import helmet from "helmet";
+import mysql from "mysql2/promise";
+import passport from "passport";
+import winston from "winston";
 import { validationResult } from "express-validator";
 
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import googleRoutes from "./routes/googleRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -145,9 +143,6 @@ const dbPool = mysql.createPool({
 
 // --- MIDDLEWARE SESSION ---
 
-// const redisClient = createClient();
-// redisClient.connect().catch(console.error);
-
 app.use(
   session({
     secret: process.env.SECRET_KEY,
@@ -186,20 +181,6 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === "production" ? {} : err.stack,
   });
 });
-
-const validateRequest = (validations) => {
-  return async (req, res, next) => {
-    await Promise.all(validations.map((validation) => validation.run(req)));
-
-    const errors = validationResult(req);
-
-    if (errors.isEmpty()) {
-      return next();
-    }
-
-    return res.status(400).json({ errors: errors.array() });
-  };
-};
 
 // --- DEFINITION DES ROUTES ---
 

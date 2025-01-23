@@ -1,128 +1,140 @@
 /** @jsxImportSource @emotion/react */
-import InstructionAnimation from "../../common/animation/InstructionAnimation";
+import gsap from "gsap";
+import InstructionAnimation from "../../common/animation/InstructionAnimation.jsx";
 import React, { useEffect, useRef, useState } from "react";
 import { css } from "styled-components";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { OrbitControls } from "@react-three/drei";
-import { useMediaQuery, useTheme } from "@mui/material";
-import { useFrame } from "@react-three/fiber";
+import { useMediaQueries } from "../../../config/config.js";
 
 // --- STYLES DE CANVAS ---
 
-const canvasStyle = (isXs, upXXL, size, color, animation, hoverCopy, calculationMiddle, isIcon) => css`
-  ${size.width > 0 &&
-  size.height > 0 &&
-  `
+const canvasStyle = (isXs, upXXL, size, color, animation, calculationMiddle, isHovered) => css`
+  overflow: visible;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 200%;
+  transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+
   canvas {
-    max-width: ${size.width}px;
-    max-height: ${size.height}px;
-    }
-  `}
+    width: ${animation ? "1000px" : size.width} !important;
+    height: "25vh" !important;
+    transition: none !important;
+  }
 
-  ${!isIcon &&
-  `
-    height: 25vh !important;
-    cursor: pointer;
-  `}
-
-  ${hoverCopy === color &&
-  `
-    transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
-    transform: translateX(-20px) scale(1.1);
-  `}
-
-  ${animation && animation === color
+  ${animation === color
     ? `
-    transform: translate(${calculationMiddle()}px, ${isXs ? "150px" : upXXL ? "350px" : "250px"}) scale(1.7);
-    
-    transition: transform 0.75s cubic-bezier(0.60, 0.2, 0.05, 1);
+    transform: translate(${calculationMiddle()}px, ${isXs ? "190px" : upXXL ? "350px" : "250px"}) scale(1.7);
+    transition: all 0.8s cubic-bezier(0.60, 0.2, 0.05, 1);
     z-index: 1000;
     cursor: grab;
-  `
-    : `
-    transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1), 
-                filter 0.6s cubic-bezier(0.25, 0.1, 0.25, 1); 
-    
-    &:hover {
-      transform: translateX(-20px) scale(1.1);
-    }
-  `}
+    `
+    : isHovered === color
+    ? `
+    transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transform: translateX(-15px) scale(1.1); 
+    `
+    : ``}
 `;
 
 // --- COMPOSANT MODEL ---
 
-function Model({
-  scale,
-  color,
-  animation,
-  instructionAnimation,
-  setInstructionAnimation,
-  resetRotation,
-  setResetRotation,
-  orbitControls,
-}) {
+function Model({ scale, color, animation, instructionAnimation, setInstructionAnimation, hasBeenMoved }) {
   const { scene } = useLoader(GLTFLoader, `/models/${color}.glb`);
   const mesh = useRef();
-  const elapsedRef = useRef(0);
-  const shouldAnimate = useRef(false);
+  const timeline = useRef();
+  const initialRotation = useRef({ x: 0, y: 0, z: 0 });
 
-  // ACTIVATION & RESET DE L'ANIMATION
+  // --- ANIMATION D'INSTRUCTION ---
 
   useEffect(() => {
-    if (animation === color && instructionAnimation) {
-      shouldAnimate.current = true;
+    if (
+      !sessionStorage.getItem("instructionShown") &&
+      animation === color &&
+      instructionAnimation &&
+      !hasBeenMoved &&
+      mesh.current
+    ) {
+      // Sauvegarde de la rotation initiale
+      initialRotation.current = {
+        x: mesh.current.rotation.x,
+        y: mesh.current.rotation.y,
+        z: mesh.current.rotation.z,
+      };
+
+      timeline.current = gsap.timeline({
+        onComplete: () => {
+          if (mesh.current) {
+            gsap.to(mesh.current.rotation, {
+              onComplete: () => {
+                setInstructionAnimation(false);
+              },
+            });
+          }
+        },
+      });
+
+      // ÉTAPE DES ANIMATIONS
+
+      timeline.current
+        .to(mesh.current.rotation, {
+          y: -0.4,
+          duration: 0.8,
+          ease: "power2.inOut",
+        })
+        .to(mesh.current.rotation, {
+          y: 0.4,
+          duration: 0.8,
+          ease: "power2.inOut",
+        })
+        .to(mesh.current.rotation, {
+          y: 0,
+          duration: 0.8,
+          ease: "power2.inOut",
+        });
     }
-  }, [animation, color, instructionAnimation]);
 
-  // ANIMATION PLAQUE INSTRUCTION
+    // SI L'ANIMATION EST INTERROMPUE / TERMINÉE
 
-  useFrame((state, delta) => {
-    const OPACITY_TIME = 0.4;
-    const TOTAL_ANIMATION_TIME = 4 - OPACITY_TIME;
-    const ROTATION_RIGHT = -0.7;
-    const ROTATION_LEFT = 0.7;
-    const STAGE_DURATION = TOTAL_ANIMATION_TIME / 3;
+    return () => {
+      if (timeline.current) {
+        timeline.current.kill();
 
-    if (mesh.current && shouldAnimate.current) {
-      if (elapsedRef.current < TOTAL_ANIMATION_TIME && animation === color) {
-        // INCREMENTATION DU TEMPS
-        elapsedRef.current += delta;
+        // REINITIALISE L'AXE 0
 
-        if (elapsedRef.current < STAGE_DURATION) {
-          // ETAPE 1
-
-          const progress = elapsedRef.current / STAGE_DURATION;
-          mesh.current.rotation.y = (0 + ROTATION_RIGHT) * progress;
-        } else if (elapsedRef.current < 2 * STAGE_DURATION) {
-          // ETAPE 2
-
-          const progress = (elapsedRef.current - STAGE_DURATION) / STAGE_DURATION;
-          mesh.current.rotation.y = ROTATION_RIGHT + (ROTATION_LEFT - ROTATION_RIGHT) * progress;
-        } else if (elapsedRef.current < TOTAL_ANIMATION_TIME) {
-          // ETAPE 3
-
-          const progress = (elapsedRef.current - 2 * STAGE_DURATION) / STAGE_DURATION;
-          mesh.current.rotation.y = ROTATION_LEFT - ROTATION_LEFT * progress;
+        if (mesh.current) {
+          gsap.to(mesh.current.rotation, {
+            x: initialRotation.current.x,
+            y: initialRotation.current.y,
+            z: initialRotation.current.z,
+            duration: 0.2,
+            ease: "power2.inOut",
+            onComplete: () => {
+              setInstructionAnimation(false);
+              sessionStorage.setItem("instructionShown", "true");
+            },
+          });
         }
-      } else {
-        setInstructionAnimation(false);
-        shouldAnimate.current = false;
       }
+    };
+  }, [animation, color, instructionAnimation, hasBeenMoved]);
+
+  // --- RETOUR DE LA PLAQUE EN DIAGONALE SI ELLE N'EST PLUS SELECTIONNÉE ---
+
+  useEffect(() => {
+    if (mesh.current && animation !== color) {
+      gsap.to(mesh.current.rotation, {
+        x: 0,
+        y: Math.PI / 5,
+        z: 0,
+        duration: 0.3,
+        ease: "power2.inOut",
+      });
     }
-  });
-
-  // --- RESET AFTER 3 SECONDS WITHOUT MOVEMENT ---
-
-  useFrame(() => {
-    if (animation && animation === color && resetRotation && !shouldAnimate.current) {
-      if (orbitControls) {
-        orbitControls.reset();
-      }
-
-      setResetRotation(false);
-    }
-  });
+  }, [animation, color]);
 
   return (
     <mesh
@@ -135,40 +147,67 @@ function Model({
   );
 }
 
-function Model3D({ color, width, animation, onClick, setOrbitControls, orbitControls, hoverCopy, setHoverCopy }) {
+function Model3D({ color, width, animation, setOrbitControls, orbitControls, isHovered }) {
   // --- ÉTATS ET RÉFÉRENCES ---
 
+  const { IS_XS, IS_SM, IS_MD, UP_XL, UP_XXL } = useMediaQueries();
   const [instructionAnimation, setInstructionAnimation] = useState(false);
   const [resetRotation, setResetRotation] = useState(false);
   const [size, setSize] = useState({});
+  const [hasBeenMoved, setHasBeenMoved] = useState(false);
+  const [camera, setCamera] = useState(null);
 
   const inactivityTimeout = useRef(null);
+  const instructionTimeout = useRef(null);
   const canvasRef = useRef(null);
-  const theme = useTheme();
 
-  const isXs = useMediaQuery(theme.breakpoints.between("xs", "sm"));
-  const isSm = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const isMd = useMediaQuery(theme.breakpoints.between("md", "lg"));
-  const upXXL = useMediaQuery((theme) => theme.breakpoints.up("xxl"));
+  // --- RESET LE TIMER SI IL BOUGE LE MODELE + CHECK SI IL A ETE TOUCHE POUR ANNULER L'ANIMATION D'INSTRUCTION ---
 
-  // --- RESET AFTER 3 SECONDS WITHOUT MOVEMENT ---
+  function handleOrbitControlsStart() {
+    if (!hasBeenMoved) {
+      setHasBeenMoved(true);
+    }
 
-  function handleOrbitControlsUpdate() {
     clearTimeout(inactivityTimeout.current);
-
-    inactivityTimeout.current = setTimeout(() => {
-      setResetRotation(true);
-    }, 2000);
   }
 
+  // --- DEMARRE UN TIMER A LA FIN DU CONTROL ---
+
+  function handleOrbitControlsEnd() {
+    clearTimeout(inactivityTimeout.current);
+    inactivityTimeout.current = setTimeout(() => {
+      // SI LE TEMPS EST ECOULE SANS BOUGER LE MODELE
+
+      if (orbitControls) {
+        const duration = 1;
+
+        gsap.to(orbitControls.object.position, {
+          duration,
+          x: 0,
+          y: 0,
+          z: 5, // POSITION DE LA CAMERA
+          ease: "power2.inOut",
+          onComplete: () => {
+            setResetRotation(true);
+            orbitControls.update();
+          },
+        });
+      }
+    }, 500);
+  }
+
+  // --- EVENT START & END ORBIT CONTROL ---
+
   useEffect(() => {
-    if (orbitControls) {
-      orbitControls.addEventListener("change", handleOrbitControlsUpdate);
+    if (animation === color && orbitControls) {
+      orbitControls.addEventListener("start", handleOrbitControlsStart);
+      orbitControls.addEventListener("end", handleOrbitControlsEnd);
     }
 
     return () => {
       if (orbitControls) {
-        orbitControls.removeEventListener("change", handleOrbitControlsUpdate);
+        orbitControls.removeEventListener("start", handleOrbitControlsStart);
+        orbitControls.removeEventListener("end", handleOrbitControlsEnd);
       }
     };
   }, [orbitControls]);
@@ -176,15 +215,23 @@ function Model3D({ color, width, animation, onClick, setOrbitControls, orbitCont
   // --- ADJUST PLAQUE SIZE ---
 
   useEffect(() => {
-    if (canvasRef.current) {
-      setTimeout(() => {
-        setSize({
-          width: canvasRef.current.offsetWidth,
-          height: canvasRef.current.offsetHeight,
-        });
-      }, 2000);
-    }
-  }, []);
+    const handleResize = () => {
+      if (canvasRef.current && camera) {
+        const width = canvasRef.current.clientWidth;
+        const height = canvasRef.current.clientHeight;
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        if (orbitControls) {
+          orbitControls.update();
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [camera, orbitControls]);
 
   // --- RESET ORBIT CONTROL IF SELECTED OTHER PLAQUE ---
 
@@ -200,50 +247,55 @@ function Model3D({ color, width, animation, onClick, setOrbitControls, orbitCont
     if (animation === color && !instructionAnimation) {
       // ATTENDRE L'ANIMATION DE LA PLAQUE
 
-      setTimeout(() => {
+      instructionTimeout.current = setTimeout(() => {
         setInstructionAnimation(true);
-      }, 2000);
+      }, 1000);
     }
 
     return () => {
+      if (instructionTimeout.current) {
+        clearTimeout(instructionTimeout.current);
+        instructionTimeout.current = null;
+      }
       setInstructionAnimation(false);
     };
   }, [animation, color]);
 
-  // --- HANDLERS ---
-
-  function handleMouseEnter(color) {
-    setHoverCopy(`${color}_duplicate`);
-  }
-
-  function handleMouseLeave() {
-    setHoverCopy(null);
-  }
-
   // --- RESPONSIVE FUNCTIONS ---
 
   function getModelScale() {
-    if (isXs) return 0.03;
-    if (isSm) return 0.035;
-    if (isMd) return 0.05;
+    if (IS_XS) return 0.043;
+    if (IS_SM) return 0.045;
+    if (IS_MD) return 0.05;
     return 0.05;
   }
 
+  const getAdjustedMoveValue = (moveValue) => {
+    const isPositive = moveValue < 0 ? false : true;
+
+    if (IS_XS) return moveValue * 1;
+    if (IS_SM) return isPositive ? moveValue * 1 : moveValue / 1.4;
+    if (IS_MD) return isPositive ? moveValue * 1.2 : moveValue / 1.5;
+    if (UP_XL) return isPositive ? moveValue * 1 : moveValue / 1.175;
+    if (UP_XXL) return isPositive ? moveValue * 2 : moveValue / 1.1;
+    return moveValue;
+  };
+
   function calculationMiddle() {
-    let defaultWidth = width / 3.8;
+    let defaultWidth = width / 4;
     switch (color) {
       case "Noir":
-        return defaultWidth;
+        return getAdjustedMoveValue(defaultWidth / 1);
       case "CanonDeFusil":
-        return defaultWidth / 1.6;
+        return getAdjustedMoveValue(defaultWidth / 1.7);
       case "Acier":
-        return defaultWidth / 5;
+        return getAdjustedMoveValue(defaultWidth / 6);
       case "Bronze":
-        return -defaultWidth / 5;
+        return getAdjustedMoveValue(-defaultWidth / 3.5);
       case "Laiton":
-        return -defaultWidth / 1.6;
+        return getAdjustedMoveValue(-defaultWidth / 1.25);
       case "BlancMat":
-        return -defaultWidth;
+        return getAdjustedMoveValue(-defaultWidth / 0.75);
       default:
         return null;
     }
@@ -255,16 +307,17 @@ function Model3D({ color, width, animation, onClick, setOrbitControls, orbitCont
     <>
       {/* INSTRUCTIONS */}
 
-      {instructionAnimation && <InstructionAnimation calculationMiddle={calculationMiddle} isXs={isXs} upXXL={upXXL} />}
+      {instructionAnimation && !hasBeenMoved && !sessionStorage.getItem("instructionShown") && (
+        <InstructionAnimation calculationMiddle={calculationMiddle} isXs={IS_XS} upXXL={UP_XXL} />
+      )}
 
       {/* CANVA */}
 
       <Canvas
         ref={canvasRef}
-        css={() => canvasStyle(isXs, upXXL, size, color, animation, hoverCopy, calculationMiddle, false)}
-        onClick={onClick}
-        onMouseEnter={() => handleMouseEnter(color)}
-        onMouseLeave={handleMouseLeave}>
+        css={() => canvasStyle(IS_XS, UP_XXL, size, color, animation, calculationMiddle, isHovered)}
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        onCreated={({ camera }) => setCamera(camera)}>
         {/* LIGHTS */}
 
         <ambientLight intensity={1.8} />
@@ -275,6 +328,7 @@ function Model3D({ color, width, animation, onClick, setOrbitControls, orbitCont
         <Model
           scale={getModelScale()}
           color={color}
+          hasBeenMoved={hasBeenMoved}
           animation={animation}
           instructionAnimation={instructionAnimation}
           setInstructionAnimation={setInstructionAnimation}
@@ -285,13 +339,13 @@ function Model3D({ color, width, animation, onClick, setOrbitControls, orbitCont
 
         {/* MOVEMENT SYSTEM */}
 
-        {!instructionAnimation && animation === color && (
+        {animation === color && (
           <OrbitControls
             ref={(ref) => setOrbitControls(ref)}
             enableZoom={false}
             enablePan={true}
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI - Math.PI / 2}
+            minPolarAngle={Math.PI / 6}
+            maxPolarAngle={Math.PI - Math.PI / 6}
             minAzimuthAngle={-Math.PI / 3}
             maxAzimuthAngle={Math.PI / 3}
           />

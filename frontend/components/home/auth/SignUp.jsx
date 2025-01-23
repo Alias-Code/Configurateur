@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useAuthContext } from "../../../context/AuthContext";
+import { TitleStyle } from "../../utils/SharedStyle";
 
 const Overlay = styled.div`
   display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
@@ -13,7 +14,7 @@ const Overlay = styled.div`
   background: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 99999999999;
 `;
 
 const Modal = styled.div`
@@ -386,11 +387,11 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
   // --- RETURN ---
 
   return (
-    <Overlay isOpen={isSignUpOpen}>
-      <Modal className={modalAnimation} type={type}>
+    <Overlay isOpen={isSignUpOpen} onClick={handleCloseSignUp}>
+      <Modal className={modalAnimation} type={type} onClick={(e) => e.stopPropagation()}>
         <div className="topform">
           <CloseButton onClick={handleCloseSignUp}>&times;</CloseButton>
-          <ReturnButton onClick={handleReturn} src="back.svg" alt="Icône pour retourner en arrière" />
+          <ReturnButton onClick={handleReturn} src="/back.svg" alt="Icône pour retourner en arrière" />
         </div>
 
         {/* PARTICULIER OU PRO (STOCKÉ DANS TYPE) */}
@@ -411,11 +412,11 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
 
         {type !== "" && (
           <>
-            <h2>
+            <TitleStyle>
               {type === "particulier"
                 ? "Inscrivez-vous en tant que particulier"
                 : "Inscrivez-vous en tant que professionnel"}
-            </h2>
+            </TitleStyle>
             <div className="inputGroup">
               <div className="entryarea">
                 <Input type="text" name="prenom" value={formData.prenom} onChange={handleChange} required />

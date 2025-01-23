@@ -13,14 +13,14 @@ const CartContainer = styled.div`
   background-color: black;
   /* transform: ${({ cartAnimation }) => (cartAnimation ? "translateY(0px)" : "translateY(50px)")}; */
   position: absolute;
-  z-index: 100;
+  z-index: 999999999;
   overflow: ${({ checkoutAnimation }) => (checkoutAnimation ? "auto" : "visible")};
-  bottom: 0;
   color: white;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: ${({ showCart, isMobile, checkoutAnimation }) =>
-    checkoutAnimation ? "100vh" : showCart ? (isMobile ? "89vh" : "75vh") : "1.3rem"};
+    checkoutAnimation ? "100vh" : showCart ? (isMobile ? "85vh" : "75vh") : "1.3rem"};
   cursor: ${({ showCart }) => (showCart ? "default" : "pointer")};
   transition: all 0.75s ease;
 
@@ -78,16 +78,17 @@ const CartTitle = styled(TitleStyle)`
   transition: opacity 0.5s ease;
   text-align: center;
   transform: translateY(-20px);
+  font-size: clamp(0.7rem, 2vw, 1rem) !important;
 `;
 
 const ResumeContainer = styled.div`
   color: ${({ checkoutAnimation }) => (checkoutAnimation ? "#333" : "#d8d8d8")};
-  overflow: auto;
+  overflow: scroll;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2rem;
-  max-height: ${({ checkoutAnimation }) => (checkoutAnimation ? "0" : "75vh")};
+  max-height: ${({ checkoutAnimation }) => (checkoutAnimation ? "0" : "80vh")};
   width: 100%;
   transform: translateY(${({ checkoutAnimation }) => (checkoutAnimation ? "-20px" : "0")});
 
@@ -106,6 +107,14 @@ const ItemContainer = styled.div`
   justify-content: center;
   width: 100%;
 
+  @media screen and (max-width: 767px) {
+    flex-direction: column;
+
+    div {
+      padding: 0px;
+    }
+  }
+
   .imagePreview {
     height: 12.5rem;
     width: 13rem;
@@ -115,6 +124,10 @@ const ItemContainer = styled.div`
 
 const ResumeSection = styled.div`
   width: ${({ checkoutAnimation }) => (checkoutAnimation ? "100%" : "40%")};
+
+  @media screen and (max-width: 767px) {
+    width: 90%;
+  }
 `;
 
 const FinalCheckoutContainer = styled.div`
@@ -122,6 +135,7 @@ const FinalCheckoutContainer = styled.div`
   justify-content: center;
   gap: 3rem;
   width: 100%;
+  margin-bottom: 2rem;
 
   &::before {
     content: "";
@@ -132,6 +146,17 @@ const FinalCheckoutContainer = styled.div`
   .container {
     padding-right: 1rem;
     width: 40%;
+  }
+
+  @media screen and (max-width: 767px) {
+    .container {
+      width: 90%;
+      padding: 0px;
+    }
+
+    &::before {
+      display: none;
+    }
   }
 `;
 
@@ -175,7 +200,7 @@ export default function CartInformations() {
         showCart={showCart}
         checkoutAnimation={checkoutAnimation}
         onClick={() => !checkoutAnimation && setShowCart(!showCart)}>
-        <img src={showCart ? "arrow_down.svg" : "shoppingbag.svg"} alt="Icône du panier" />
+        <img src={showCart ? "/arrow_down_white.svg" : "/shoppingbag.svg"} alt="Icône du panier" />
       </CartIcon>
 
       {!checkoutAnimation ? (

@@ -4,7 +4,7 @@ import ResumeSummary from "../utils/ResumeSummary";
 import CheckoutConfirm from "./CheckoutConfirm";
 import PaymentMethod from "./checkout-steps/PaymentMethod";
 import Shipping from "./checkout-steps/Shipping";
-import Adresses from "../profil/sections/Adresses/Address";
+import Adresses from "../profil/sections/adresses/Address";
 import Spinner from "../common/Spinner";
 import React, { useState, useEffect } from "react";
 import { useNotificationsContext } from "../../context/NotificationsContext";

@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { Button } from "../../utils/SharedStyle.jsx";
-import Steps from "../../configuration/config-side/StepContainer.jsx";
+import Step from "../../configuration/config-side/Step.jsx";
 
 // --- GRAVURES ---
 
@@ -11,7 +11,7 @@ export default function Gravures() {
 
   return (
     <Grid container>
-      <Steps
+      <Step
         name="VOTRE GRAVURE"
         description="Ajoutez jusqu'à 2 gravures (texte ou icône) par emplacement. Notez vos exigences en fin de commande."
         category="Gravures">
@@ -26,7 +26,7 @@ export default function Gravures() {
 
         {/* GRAVURE SETTINGS */}
         {/* {showGravure && <GravureModal onClose={toggleModal} />} */}
-      </Steps>
+      </Step>
     </Grid>
   );
 }

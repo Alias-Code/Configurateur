@@ -1,27 +1,6 @@
 import React from "react";
-import styled, { css, keyframes } from "styled-components";
-
-const Instruction = styled.img`
-  position: absolute;
-  top: 70%;
-  left: 50%;
-  width: 40px;
-  height: 40px;
-  margin-left: -22px;
-  pointer-events: none;
-  padding: 0px !important;
-  z-index: 9999999999 !important;
-  pointer-events: none;
-  user-select: none;
-  filter: invert(1);
-
-  ${({ animation, calculationMiddle, isXs, upXXL }) =>
-    animation &&
-    css`
-      animation: ${generateScrollAnimation(calculationMiddle, isXs, upXXL)} 4s ease-in-out;
-      transform: translate(${calculationMiddle()}px, ${isXs ? "150px" : upXXL ? "350px" : "250px"});
-    `}
-`;
+import styled from "@emotion/styled";
+import { css, keyframes } from "@emotion/react";
 
 const generateScrollAnimation = (calculationMiddle, isXs, upXXL) => keyframes`
     0% {
@@ -34,6 +13,7 @@ const generateScrollAnimation = (calculationMiddle, isXs, upXXL) => keyframes`
     }
     60% {
       transform: translate(calc(${calculationMiddle()}px + 40px), ${isXs ? "150px" : upXXL ? "350px" : "250px"});
+      opacity: 1;
     }
     80% {
       transform: translate(${calculationMiddle()}px, ${isXs ? "150px" : upXXL ? "350px" : "250px"});
@@ -43,6 +23,30 @@ const generateScrollAnimation = (calculationMiddle, isXs, upXXL) => keyframes`
       opacity: 0;
       transform: translate(${calculationMiddle()}px, ${isXs ? "150px" : upXXL ? "350px" : "250px"});
     }
+`;
+
+const Instruction = styled.img`
+  position: absolute;
+  top: 70%;
+  left: 85%;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+  padding: 0px !important;
+  z-index: 9999999999;
+  user-select: none;
+  filter: invert(1);
+
+  @media (max-width: 767px) {
+    top: 90%;
+  }
+
+  ${({ animation, calculationMiddle, isXs, upXXL }) =>
+    animation &&
+    css`
+      animation: ${generateScrollAnimation(calculationMiddle, isXs, upXXL)} 2.9s ease-in-out;
+      transform: translate(${calculationMiddle()}px, ${isXs ? "150px" : upXXL ? "350px" : "250px"});
+    `}
 `;
 
 export default function InstructionAnimation({ calculationMiddle, isXs, upXXL }) {

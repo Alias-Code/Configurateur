@@ -14,7 +14,7 @@ const Overlay = styled.div`
   background: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 99999999999;
 `;
 
 const Modal = styled.div`
@@ -333,8 +333,8 @@ export default function SignIn({
   };
 
   return (
-    <Overlay isOpen={isSignInOpen}>
-      <Modal className={modalAnimation}>
+    <Overlay isOpen={isSignInOpen} onClick={handleCloseSignIn}>
+      <Modal className={modalAnimation} onClick={(e) => e.stopPropagation()}>
         <CloseButton onClick={handleCloseSignIn}>&times;</CloseButton>
 
         {/* SIMPLE CONNEXION */}
@@ -377,7 +377,7 @@ export default function SignIn({
 
         <HrContainer>
           <Line />
-          <CenteredText>SI VOUS AVEZ UTILISÉ GOOGLE</CenteredText>
+          <CenteredText>RÉSEAUX SOCIAUX</CenteredText>
           <Line />
         </HrContainer>
         <GoogleLogin onSuccess={handleLoginSuccess} onError={() => console.log("Erreur")} />

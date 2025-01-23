@@ -131,6 +131,7 @@ const MondialRelayPicker = ({ onPointRelaisSelect }) => {
 
       try {
         const mrScript = document.createElement("script");
+
         mrScript.src =
           "https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js";
         mrScript.async = true;
@@ -157,8 +158,8 @@ const MondialRelayPicker = ({ onPointRelaisSelect }) => {
       if (window.jQuery && widgetContainerRef.current) {
         try {
           window.jQuery(widgetContainerRef.current).empty();
-        } catch (e) {
-          console.error("Erreur lors du nettoyage:", e);
+        } catch (error) {
+          console.error("Erreur lors du nettoyage:", error);
         }
       }
     };

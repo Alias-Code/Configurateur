@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { TitleStyle } from "../../Global/SharedStyle";
 import styled from "@emotion/styled";
-import GravureEmplacement from "./GravuresSteps/GravureEmplacement";
-import GravureSettings from "./GravuresSteps/GravureSettings";
-import GravureRender from "./GravuresSteps/GravureRender";
-import GravureSettingsSelection from "./GravuresSteps/GravureSettingsSelection";
+import GravureEmplacement from "./gravure-step/GravureEmplacement";
+import GravureSettings from "./gravure-step/GravureSettings";
+import GravureRender from "./gravure-step/GravureRender";
+import GravureSettingsSelection from "./gravure-step/GravureSettingsSelection";
 
 const ModalBackground = styled.div`
   position: fixed;

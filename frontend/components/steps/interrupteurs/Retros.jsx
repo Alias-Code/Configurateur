@@ -1,10 +1,12 @@
 import productInformations from "../../../config/productInformations.js";
-import Steps from "../../configuration/config-side/StepContainer.jsx";
+import Step from "../../configuration/config-side/Step.jsx";
 import InterrupteursBox from "./InterrupteursBox.jsx";
 import React, { useState } from "react";
 import { Grid } from "@mui/material";
+import { useNotificationsContext } from "../../../context/NotificationsContext.jsx";
 
 export default function Retros() {
+  const { setNotifications } = useNotificationsContext();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const retros = productInformations.Retros.slice(0, 6);
 
@@ -18,15 +20,23 @@ export default function Retros() {
     setHoveredIndex(null);
   };
 
+  const handleClick = (index) => {
+    setHoveredIndex((prevIndex) => (prevIndex === index ? null : index));
+  };
+
   // --- RENDU ---
 
   return (
     <Grid container>
-      <Steps name="INTERRUPTEURS RETRO" description="" noHr={true} category="retros">
+      <Step name="INTERRUPTEURS RETRO" description="" noHr={true} category="retros">
         {retros.map((item, index) => (
           <Grid
-            onMouseOver={() => handleMouseOver(index)}
+            onMouseEnter={() => handleMouseOver(index)}
             onMouseLeave={handleMouseOut}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick(index);
+            }}
             item
             xs={3.01}
             sm={1.75}
@@ -37,11 +47,22 @@ export default function Retros() {
             id={item.id}
             name={item.name}
             draggable>
-            <img src={`${item.id}.png`} alt={item.name} />
+            <img
+              onClick={() => {
+                if (!window.matchMedia("(hover: none)").matches) {
+                  setNotifications({
+                    content: "Veuillez choisir une option de mécanisme dans le menu.",
+                    type: "error",
+                  });
+                }
+              }}
+              src={`${item.id}.png`}
+              alt={item.name}
+            />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />
           </Grid>
         ))}
-      </Steps>
+      </Step>
     </Grid>
   );
 }

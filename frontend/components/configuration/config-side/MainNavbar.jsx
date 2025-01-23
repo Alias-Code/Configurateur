@@ -4,6 +4,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../context/AuthContext";
 import { TitleStyle } from "../../utils/SharedStyle";
+import { useChoicesContext } from "../../../context/ChoicesContext";
 
 const NavbarWrapper = styled.nav`
   width: 100%;
@@ -17,12 +18,12 @@ const NavbarWrapper = styled.nav`
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 
   @media (max-width: 768px) {
-    padding: 0 16px;
+    padding: 1rem 16px;
     height: 70px;
   }
 
   @media (max-width: 480px) {
-    padding: 0 12px;
+    padding: 1rem;
     height: 60px;
   }
 `;
@@ -81,7 +82,10 @@ const ContentSection = styled.div`
   flex-direction: column;
 
   @media (max-width: 768px) {
-    max-width: calc(100% - 50px);
+    max-width: 100%;
+    p {
+      font-size: 7px;
+    }
   }
 `;
 
@@ -121,46 +125,11 @@ const LogoContainer = styled.div`
   }
 `;
 
-const MenuButton = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: black;
-  height: 40px;
-  padding: 0 16px;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  position: absolute;
-  right: 0;
-  cursor: pointer;
-
-  img {
-    width: 24px;
-    height: 24px;
-    filter: invert(1);
-  }
-
-  @media (max-width: 480px) {
-    height: 32px;
-    padding: 0 12px;
-
-    img {
-      width: 20px;
-      height: 20px;
-    }
-  }
-`;
-
 export default function MainNavbar() {
   const { isAuthenticated, setSkipHome } = useAuthContext();
-  const [menu, setMenu] = useState(false);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleMenu = () => setMenu((prev) => !prev);
 
   const handleAccountClick = (e) => {
     e.preventDefault();
@@ -219,12 +188,6 @@ export default function MainNavbar() {
       <LogoContainer>
         <img src="/Vendome.png" alt="Logo de marque Vendôme" />
       </LogoContainer>
-
-      {isMobile && (
-        <MenuButton onClick={handleMenu}>
-          <img src={!menu ? "/viewconfig.svg" : "/eyeoff.svg"} alt="Icône du menu" />
-        </MenuButton>
-      )}
     </NavbarWrapper>
   );
 }

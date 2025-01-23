@@ -18,7 +18,7 @@ const ModalBackdrop = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 999999999;
 `;
 
 const ModalBox = styled.div`
@@ -34,6 +34,10 @@ const ModalBox = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    width: 80%;
   }
 `;
 
@@ -122,8 +126,8 @@ const Modal = () => {
 
   return createPortal(
     shouldRenderModal && (
-      <ModalBackdrop>
-        <ModalBox>
+      <ModalBackdrop onClick={closeModal}>
+        <ModalBox onClick={(e) => e.stopPropagation()}>
           <ModalTitle>Confirmer la suppression</ModalTitle>
           <ModalContent>
             {type === "cart" ? (

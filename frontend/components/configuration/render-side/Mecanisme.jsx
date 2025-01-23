@@ -12,6 +12,8 @@ const MecanismeImage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 99999999;
+  transition: all 0.5s ease;
 `;
 
 const CrossImage = styled.img`
@@ -38,7 +40,7 @@ const CrossImage = styled.img`
   }
 `;
 
-const Mecanisme = ({ src, positionY, positionX, dimension, item }) => {
+const Mecanisme = ({ src, positionY, positionX, dimension, item, type }) => {
   const { openModal } = useModalContext();
   const [svgElement, setSvgElement] = useState(null);
   const [isHovered, setHovered] = useState(false);
@@ -56,35 +58,35 @@ const Mecanisme = ({ src, positionY, positionX, dimension, item }) => {
     }, 10);
   };
 
-  useEffect(() => {
-    const loadSvg = async () => {
-      try {
-        const response = await fetch(src, {
-          method: "GET",
-          headers: {
-            "Content-Type": "image/svg+xml",
-            "Cross-Origin": "anonymous",
-          },
-        });
-        const svgText = await response.text();
-        const parser = new DOMParser();
-        const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-        const svgElement = svgDoc.documentElement;
-        setSvgElement(svgElement);
-      } catch (error) {
-        console.error("Erreur lors du chargement du SVG:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const loadSvg = async () => {
+  //     try {
+  //       const response = await fetch(src, {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "image/svg+xml",
+  //           "Cross-Origin": "anonymous",
+  //         },
+  //       });
+  //       const svgText = await response.text();
+  //       const parser = new DOMParser();
+  //       const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
+  //       const svgElement = svgDoc.documentElement;
+  //       setSvgElement(svgElement);
+  //     } catch (error) {
+  //       console.error("Erreur lors du chargement du SVG:", error);
+  //     }
+  //   };
 
-    loadSvg();
-  }, [src]);
+  //   loadSvg();
+  // }, [src]);
 
-  useEffect(() => {
-    if (svgElement && svgContainerRef.current) {
-      svgContainerRef.current.innerHTML = "";
-      svgContainerRef.current.appendChild(svgElement);
-    }
-  }, [svgElement]);
+  // useEffect(() => {
+  //   if (svgElement && svgContainerRef.current) {
+  //     svgContainerRef.current.innerHTML = "";
+  //     svgContainerRef.current.appendChild(svgElement);
+  //   }
+  // }, [svgElement]);
 
   return (
     <MecanismeImage
@@ -94,7 +96,8 @@ const Mecanisme = ({ src, positionY, positionX, dimension, item }) => {
       dimension={dimension}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
-      {isHovered && (
+      <img src={src} alt="" />
+      {isHovered && type !== "mobilePreview" && (
         <CrossImage
           hovered={isHovered}
           onClick={() => openModal({ type: "preview", data: item })}

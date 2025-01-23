@@ -69,6 +69,23 @@ export default function AppContent() {
     }
   };
 
+  // --- RESIZE IPHONE ---
+
+  useEffect(() => {
+    const resizeApp = () => {
+      if (/iPhone/.test(navigator.userAgent)) {
+        document.documentElement.style.setProperty("--app-height", `${window.innerHeight}px`);
+      }
+    };
+
+    resizeApp();
+    window.addEventListener("resize", resizeApp);
+
+    return () => {
+      window.removeEventListener("resize", resizeApp);
+    };
+  }, []);
+
   // --- RENDU ---
 
   if (!isAuthChecked) {

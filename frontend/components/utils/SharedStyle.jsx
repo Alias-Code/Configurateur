@@ -5,29 +5,29 @@ import styled from "@emotion/styled";
 export const MecanismeBoxStyle = styled.div`
   opacity: ${({ visible }) => (visible ? "1" : "0")};
   position: absolute;
-  top: 125%;
+  top: 130%;
   left: 30%;
   transform: translate(-50%);
   border-radius: 4px;
   background: white;
   border: 1px solid black;
   color: black;
-  width: 8rem;
+  width: clamp(6rem, 8vw, 8rem);
   text-align: center;
   transition: all 0.5s ease;
 
   p {
     font-weight: 700;
     letter-spacing: 2px;
-    font-size: 0.5rem;
+    font-size: clamp(0.3rem, 1vw, 0.5rem);
     text-transform: uppercase;
     border-bottom: 1px solid black;
     color: black;
-    padding: 0.25rem 0;
-    cursor: pointer;
+    padding: clamp(0.2rem, 0.5vw, 0.25rem) 0;
     position: relative;
     overflow: hidden;
     transition: all 0.5s ease;
+    cursor: pointer;
 
     &:hover {
       color: white;
@@ -63,7 +63,7 @@ export const Button = styled.button`
   border: 1px solid;
   border-color: ${({ borderColor }) => borderColor || "white"};
   color: ${({ bgColor, textColor }) => (bgColor === "black" ? "white" : bgColor === "white" ? "black" : textColor)};
-  border-radius: 10px;
+  border-radius: 8px;
   position: relative;
   overflow: hidden;
   transition: color 0.5s ease;
@@ -72,8 +72,7 @@ export const Button = styled.button`
   p {
     padding-left: ${({ noPadding }) => (noPadding ? "0rem" : "0.4rem")};
     font-weight: 500;
-    font-size: 0.7rem;
-    letter-spacing: 1px;
+    font-size: clamp(0.5rem, 2vw, 0.7rem);
     transform: ${({ type }) => type === "checkout" && "translateY(1px)"};
   }
 
@@ -87,20 +86,6 @@ export const Button = styled.button`
     position: relative;
     padding-right: 0px !important;
     z-index: 2;
-  }
-
-  @media (max-width: 600px) {
-    margin-right: 0.2rem;
-    padding: 0.4rem 0.5rem;
-
-    img {
-      height: 0.8rem !important;
-      width: 0.8rem !important;
-    }
-
-    p {
-      font-size: 0.6rem !important;
-    }
   }
 
   &::before {
@@ -133,12 +118,12 @@ export const Button = styled.button`
 export const TitleStyle = styled.h2`
   font-weight: 100;
   letter-spacing: 4px;
-  font-size: ${(props) => props.fontSize || "1.25rem"};
+  font-size: ${(props) => props.fontSize || "1rem"} !important;
   text-transform: uppercase;
   color: ${(props) => props.color || "black"};
   margin-bottom: ${(props) => props.mb || "0"};
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     font-size: 0.5rem;
   }
 `;

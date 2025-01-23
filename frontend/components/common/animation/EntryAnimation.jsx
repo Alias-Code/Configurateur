@@ -60,17 +60,19 @@ export default function EntryAnimation() {
           videoRef.current.play();
         }
 
-        const [type, url] = entryAnimation.split("_");
+        setTimeout(() => {
+          const [type, url] = entryAnimation.split("_");
 
-        if (type === "login") {
-          setIsAuthenticated(true);
-        } else if (type === "logout") {
-          setIsAuthenticated(false);
-        } else if (type === "skip" && url === "/configuration") {
-          setSkipHome(true);
-        } else if (type === "skip" && url === "/accueil") {
-          setSkipHome(false);
-        }
+          if (type === "login") {
+            setIsAuthenticated(true);
+          } else if (type === "logout") {
+            setIsAuthenticated(false);
+          } else if (type === "skip" && url === "/configuration") {
+            setSkipHome(true);
+          } else if (type === "skip" && url === "/accueil") {
+            setSkipHome(false);
+          }
+        }, 2000);
 
         navigate(url);
       }, 600);
@@ -92,7 +94,7 @@ export default function EntryAnimation() {
 
   return (
     <VideoContainer entryAnimation={entryAnimation}>
-      <video ref={videoRef} src="intro.mp4" />
+      <video ref={videoRef} src="/intro.mp4" />
     </VideoContainer>
   );
 }

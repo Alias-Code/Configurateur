@@ -44,21 +44,19 @@ const TrashIcon = styled.img`
 const CartContainer = styled.div`
   display: flex;
   align-items: center;
-
-  button p {
-    font-size: 0.6rem;
-  }
 `;
 
 const PrixContainer = styled.div`
   text-align: right;
 
+  /* PRIX TOTAL FINAL_CART PLUS GRAND QUE LE PRIX AFFICHÉ PLUSIEURS FOIS POUR CHAQUE CONFIG */
+
   p {
-    font-size: ${({ type }) => (type === "final_cart" ? "0.8rem" : "0.70rem")};
+    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.7rem, 2vw, 0.9rem)" : "clamp(0.4rem, 2vw, 0.6rem)")};
   }
 
-  .prix {
-    font-size: ${({ type }) => (type === "final_cart" ? "0.9rem" : "0.80rem")};
+  .totalTTC {
+    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.9rem, 3vw, 1.1rem)" : "clamp(0.6rem, 3vw, 0.8rem)")};
     font-weight: 700;
   }
 `;
@@ -101,12 +99,21 @@ const ButtonContainer = styled.div`
   }
 `;
 
+const FinalButtonsContainer = styled.div`
+  display: flex;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
+`;
+
 export default function ResumeSummary({ renderRef, priceHT, type, quantity, itemIndex }) {
   // --- ÉTATS ET RÉFÉRENCES ---
 
   const { checkoutAnimation, setCheckoutAnimation } = useAnimationContext();
-  const { choices, setChoices, resetConfig } = useChoicesContext();
-  const { configurations, setConfigurations, calculateAllTotalItems } = useCartContext();
+  const { choices, setChoices, resetConfig, setMenu } = useChoicesContext();
+  const { configurations, setConfigurations, calculateAllTotalItems, calculateTotalItems } = useCartContext();
   const { setNotifications } = useNotificationsContext();
   const { isAuthenticated } = useAuthContext();
   const { openModal } = useModalContext();
@@ -190,10 +197,38 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
 
   const handleAddToCart = (quantity) => {
     if (renderRef.current) {
+      // --- VERIFICATION EMPLACEMENT VIDE ---
+
       if (!choices.facade.id && !choices.facade.couleur && !calculateAllTotalItems(choices)) {
         setNotifications({ content: "Vous ne pouvez pas ajouter une configuration vide au panier.", type: "error" });
         return;
       }
+
+      const facadeId = choices.facade.id;
+
+      if (!facadeId.includes("1")) {
+        if (calculateAllTotalItems() === 0) {
+          setNotifications({
+            content: "Vous ne pouvez pas ajouter une façade vide au panier, sauf pour la façade simple.",
+            type: "error",
+          });
+          return;
+        }
+
+        const facadesToCheck = facadeId.includes("2") ? 2 : facadeId.includes("3") ? 3 : 0;
+
+        for (let i = 0; i < facadesToCheck; i++) {
+          if (calculateTotalItems(choices.facades[i]) === 0) {
+            setNotifications({
+              content: "Vous ne pouvez pas ajouter une façade au panier avec un emplacement vide.",
+              type: "error",
+            });
+            return;
+          }
+        }
+      }
+
+      // --- OPTIONS CANVA ---
 
       const options = {
         backgroundColor: null,
@@ -249,6 +284,10 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
 
           resetConfig(type);
           setNumber(1);
+
+          // FERMETURE DU MENU POUR LES MOBILES
+
+          setMenu(false);
         })
         .catch((error) => {
           console.error("Erreur lors de la capture du canevas :", error);
@@ -366,7 +405,7 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
               />
             ) : type !== "history" ? (
               // --- FINAL CART ---
-              <>
+              <FinalButtonsContainer>
                 <Button type="checkout" bgColorHover={"#419741"} bgColor="black" onClick={handleCheckoutClick}>
                   <img className="bag" src="/checkout.svg" alt="Icône du panier" />
                   <p>PAYER EN LIGNE</p>
@@ -376,7 +415,7 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
                   <img className="bag" src="/invoice.svg" alt="Icône du panier" />
                   <p>SAUVEGARDER EN DEVIS</p>
                 </Button>
-              </>
+              </FinalButtonsContainer>
             ) : (
               ""
             )}
@@ -398,7 +437,7 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
         <PrixContainer type={type}>
           <p>MONTANT HT : {priceHT.toFixed(2)}€</p>
           <p>TVA 20% : {(priceHT * 0.2).toFixed(2)}€</p>
-          <p className="prix">TOTAL TTC : {(priceHT + priceHT * 0.2).toFixed(2)}€</p>
+          <p className="totalTTC">TOTAL TTC : {(priceHT + priceHT * 0.2).toFixed(2)}€</p>
         </PrixContainer>
       </ResumeSummaryContainer>
 

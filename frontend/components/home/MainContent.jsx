@@ -3,7 +3,7 @@ import SignIn from "./auth/SignIn";
 import SignUp from "./auth/SignUp";
 import { useState } from "react";
 import { useAnimationContext } from "../../context/AnimationContext";
-import { GoogleOAuthProvider } from "@react-oauth/google";
+import { TitleStyle } from "../utils/SharedStyle";
 
 // --- STYLE ---
 
@@ -16,16 +16,17 @@ const MainContentContainer = styled.div`
   color: white;
   margin-top: 1rem;
   height: 90vh;
-`;
 
-const MainTitle = styled.h1`
-  font-size: 1.6rem;
-  text-transform: capitalize;
+  h2 {
+    font-weight: bold;
+  }
 `;
 
 const Description = styled.p`
-  font-size: 1rem;
-  max-width: 500px;
+  font-size: clamp(0.6rem, 2vw, 1rem);
+  max-width: 600px;
+  padding: 0 1rem;
+  margin-top: 1rem;
   color: #dbdbdb;
 `;
 
@@ -34,7 +35,7 @@ const HrContainer = styled.div`
   align-items: center;
   width: 100%;
   max-width: 400px;
-  margin: 2rem 0;
+  margin: 1.5rem 0;
 `;
 
 const Line = styled.hr`
@@ -58,19 +59,19 @@ const ButtonGroup = styled.div`
 `;
 
 const Logo = styled.img`
-  height: 80px;
-  margin: 1rem 0;
+  height: 50px;
+  margin-top: 1rem;
 `;
 
 const Button = styled.button`
   color: white;
   border-radius: 7px;
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 2vw, 0.75rem);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px 10px;
-  gap: 0.25rem;
+  padding: clamp(4px, 1vw, 5px) clamp(8px, 2vw, 10px);
+  gap: clamp(0.2rem, 0.5vw, 0.25rem);
   border: 1px solid black;
   cursor: pointer;
 
@@ -78,8 +79,8 @@ const Button = styled.button`
   color: ${({ type }) => (type === "white" ? "black" : "white")};
 
   img {
-    height: 1.3rem;
-    width: 1.3rem;
+    height: clamp(0.9rem, 2vw, 1.3rem);
+    width: clamp(0.9rem, 2vw, 1.3rem);
   }
 `;
 
@@ -114,12 +115,14 @@ export default function MainContent() {
       {/* MAIN CONTENT */}
 
       <MainContentContainer>
-        <MainTitle>Configurez votre produit haut de gamme</MainTitle>
-        <Logo src="vendomeserie2_white.png" alt="Logo Lumicrea" />
+        <TitleStyle color="white" fontSize="1.5rem">
+          Configurez votre produit haut de gamme
+        </TitleStyle>
         <Description>
           Choisissez parmi une large gamme de designs et de finitions pour adapter votre installation électrique à vos
           besoins et à votre style.
         </Description>
+        <Logo src="vendomeserie2_white.png" alt="Logo Lumicrea" />
         <HrContainer>
           <Line />
           <CenteredText>Commencez votre configuration</CenteredText>
@@ -139,22 +142,20 @@ export default function MainContent() {
 
       {/* SIGN IN/UP FORMS WITH GOOGLE AUTH */}
 
-      <GoogleOAuthProvider clientId="172052439601-dkqnbasm5ouddo44abnjs0c3qepoqcc6.apps.googleusercontent.com">
-        <SignIn
-          setSignUpOpen={setSignUpOpen}
-          isSignInOpen={isSignInOpen}
-          setSignInOpen={setSignInOpen}
-          modalAnimation={modalAnimation}
-          setModalAnimation={setModalAnimation}
-        />
-        <SignUp
-          isSignUpOpen={isSignUpOpen}
-          setSignUpOpen={setSignUpOpen}
-          setSignInOpen={setSignInOpen}
-          modalAnimation={modalAnimation}
-          setModalAnimation={setModalAnimation}
-        />
-      </GoogleOAuthProvider>
+      <SignIn
+        setSignUpOpen={setSignUpOpen}
+        isSignInOpen={isSignInOpen}
+        setSignInOpen={setSignInOpen}
+        modalAnimation={modalAnimation}
+        setModalAnimation={setModalAnimation}
+      />
+      <SignUp
+        isSignUpOpen={isSignUpOpen}
+        setSignUpOpen={setSignUpOpen}
+        setSignInOpen={setSignInOpen}
+        modalAnimation={modalAnimation}
+        setModalAnimation={setModalAnimation}
+      />
     </div>
   );
 }

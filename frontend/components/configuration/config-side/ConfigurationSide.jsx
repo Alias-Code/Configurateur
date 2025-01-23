@@ -1,6 +1,8 @@
 import styled from "@emotion/styled";
-import Configuration from "./Steps";
+import Steps from "./Steps";
 import NavbarComponent from "./MainNavbar";
+import { useMediaQuery, useTheme } from "@mui/material";
+import MobileRenderPreview from "../render-side/MobileRenderPreview";
 
 // --- CONFIGURATION SIDE CONTAINER STYLES ---
 const ConfigurationSideContainer = styled.div`
@@ -14,13 +16,15 @@ const ConfigurationSideContainer = styled.div`
 `;
 
 export default function ConfigurationSide() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
     <ConfigurationSideContainer>
       {/* --- NAVBAR COMPONENT --- */}
-      <NavbarComponent />
-
+      {!isMobile ? <NavbarComponent /> : <MobileRenderPreview />}
       {/* --- MAIN CONFIGURATION COMPONENT --- */}
-      <Configuration />
+      <Steps />
     </ConfigurationSideContainer>
   );
 }

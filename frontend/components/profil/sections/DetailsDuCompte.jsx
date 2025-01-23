@@ -311,15 +311,24 @@ export default function DetailsDuCompte() {
       {userInfo && (
         <>
           <InfoSection>
-            <InfoCard>
-              <InfoLabel>Prénom</InfoLabel>
-              <InfoValue>{userInfo.firstname}</InfoValue>
-            </InfoCard>
+            {userInfo.siret ? (
+              <InfoCard>
+                <InfoLabel>Nom & Prénom</InfoLabel>
+                <InfoValue>{userInfo.lastname + " " + userInfo.firstname}</InfoValue>
+              </InfoCard>
+            ) : (
+              <>
+                <InfoCard>
+                  <InfoLabel>Prénom</InfoLabel>
+                  <InfoValue>{userInfo.firstname}</InfoValue>
+                </InfoCard>
 
-            <InfoCard>
-              <InfoLabel>Nom</InfoLabel>
-              <InfoValue>{userInfo.lastname}</InfoValue>
-            </InfoCard>
+                <InfoCard>
+                  <InfoLabel>Nom</InfoLabel>
+                  <InfoValue>{userInfo.lastname}</InfoValue>
+                </InfoCard>
+              </>
+            )}
 
             <InfoCard>
               <InfoLabel>Email</InfoLabel>
@@ -332,13 +341,13 @@ export default function DetailsDuCompte() {
             </InfoCard>
 
             <InfoCard>
-              <InfoLabel>Date de création</InfoLabel>
+              <InfoLabel>Date d'inscription</InfoLabel>
               <InfoValue>{formatDateFr(userInfo.date_add)}</InfoValue>
             </InfoCard>
 
             <InfoCard>
-              <InfoLabel>Inscrit à la newsletter</InfoLabel>
-              <InfoValue>{userInfo.newsletter ? "Oui inscrit" : "Non inscrit"}</InfoValue>
+              <InfoLabel>Newsletter</InfoLabel>
+              <InfoValue>{userInfo.newsletter ? "Inscrit" : "Non inscrit"}</InfoValue>
             </InfoCard>
 
             {userInfo.siret && (

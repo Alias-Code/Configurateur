@@ -1,32 +1,48 @@
-import Steps from "../../configuration/config-side/StepContainer.jsx";
+import Step from "../../configuration/config-side/Step.jsx";
 import productInformations from "../../../config/productInformations.js";
 import InterrupteursBox from "./InterrupteursBox.jsx";
 import React, { useState } from "react";
 import { Grid } from "@mui/material";
+import { useNotificationsContext } from "../../../context/NotificationsContext.jsx";
 
 export default function Cylindres() {
+  const { setNotifications } = useNotificationsContext();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const cylindres = productInformations.Cylindres.slice(0, 6);
+
+  // --- DÉTECTION MOBILE/TABLETTE ---
+
+  const isTouchDevice = window.matchMedia("(hover: none)").matches;
 
   // --- HANDLERS ---
 
   const handleMouseOver = (index) => {
-    setHoveredIndex(index);
+    if (!isTouchDevice) setHoveredIndex(index);
   };
 
   const handleMouseOut = () => {
-    setHoveredIndex(null);
+    if (!isTouchDevice) setHoveredIndex(null);
+  };
+
+  const handleClick = (index) => {
+    if (isTouchDevice) {
+      setHoveredIndex((prevIndex) => (prevIndex === index ? null : index));
+    }
   };
 
   // --- RENDER ---
 
   return (
     <Grid container>
-      <Steps name="INTERRUPTEURS CYLINDRES" description="" noHr={true} category="cylindres">
+      <Step name="INTERRUPTEURS CYLINDRES" description="" noHr={true} category="cylindres">
         {cylindres.map((item, index) => (
           <Grid
-            onMouseOver={() => handleMouseOver(index)}
+            onMouseEnter={() => handleMouseOver(index)}
             onMouseLeave={handleMouseOut}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick(index);
+            }}
             item
             xs={3.01}
             sm={1.75}
@@ -37,11 +53,22 @@ export default function Cylindres() {
             id={item.id}
             name={item.name}
             draggable>
-            <img src={`${item.id}.png`} alt={item.alt} />
+            <img
+              onClick={() => {
+                if (!window.matchMedia("(hover: none)").matches) {
+                  setNotifications({
+                    content: "Veuillez choisir une option de mécanisme dans le menu.",
+                    type: "error",
+                  });
+                }
+              }}
+              src={`${item.id}.png`}
+              alt={item.alt}
+            />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />
           </Grid>
         ))}
-      </Steps>
+      </Step>
     </Grid>
   );
 }

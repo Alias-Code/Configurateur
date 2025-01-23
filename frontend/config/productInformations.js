@@ -3,7 +3,7 @@ const productInformations = {
     {
       id: "Vendome",
       name: "Vendome",
-      src: "vendomeserie2.png",
+      src: "/vendomeserie2.png",
     },
   ],
 
@@ -73,7 +73,7 @@ const productInformations = {
     { id: "C-N-VR", name: "Cylindre Noir Volet Roulant", price: 30, type: "VR" },
     { id: "C-CF-VR", name: "Cylindre Canon de Fusil Volet Roulant", price: 30, type: "VR" },
     { id: "C-AC-VR", name: "Cylindre Acier Volet Roulant", price: 30, type: "VR" },
-    { id: "C-BZ-BR", name: "Cylindre Bronze Volet Roulant", price: 30, type: "VR" },
+    { id: "C-BZ-VR", name: "Cylindre Bronze Volet Roulant", price: 30, type: "VR" },
     { id: "C-LT-VR", name: "Cylindre Laiton Volet Roulant", price: 40, type: "VR" },
     { id: "C-CU-VR", name: "Cylindre Cuivre Volet Roulant", price: 30, type: "VR" },
     // --- CYLINDRE POUSSOIR ---

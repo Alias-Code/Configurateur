@@ -31,6 +31,7 @@ router.get("/auth/google/callback", async (req, res) => {
     const payload = ticket.getPayload();
 
     // Créer un objet utilisateur à partir du payload
+
     const user = {
       email: payload.email,
       givenName: payload.given_name,
@@ -38,6 +39,7 @@ router.get("/auth/google/callback", async (req, res) => {
     };
 
     // Appeler votre contrôleur googleCallback
+
     googleCallback(user, res);
   } catch (error) {
     console.error("Erreur de vérification du token Google :", error);

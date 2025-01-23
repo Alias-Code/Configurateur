@@ -10,10 +10,10 @@ const Error = styled.div`
   font-weight: bold;
   border-radius: 10px;
   position: absolute;
-  z-index: 9999999;
+  z-index: 99999999999999999;
   bottom: 80%;
   left: 1%;
-  padding: 0.4rem;
+  padding: clamp(0.3rem, 0.8vw, 0.5rem);
   display: flex;
   align-items: center;
   transform: translateX(${({ animation }) => (animation ? "0" : "-100%")});
@@ -27,6 +27,8 @@ const Error = styled.div`
 
   img {
     filter: invert(1);
+    width: clamp(12px, 3vw, 20px);
+    height: clamp(12px, 3vw, 20px);
   }
 
   ul {
@@ -38,13 +40,13 @@ const Error = styled.div`
   li {
     display: flex;
     align-items: center;
-    margin-bottom: 0.2rem;
+    margin-bottom: clamp(0.1rem, 0.5vw, 0.2rem);
   }
 
   p,
   a {
-    padding-left: 0.4rem;
-    font-size: 14px;
+    padding-left: clamp(0.2rem, 0.6vw, 0.3rem);
+    font-size: clamp(8px, 1.5vw, 12px);
     color: white;
   }
 

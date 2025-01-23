@@ -11,7 +11,7 @@ import Prises from "../../steps/Prises.jsx";
 import Gravures from "../../steps/gravures/Gravures.jsx";
 import Socials from "./Socials.jsx";
 
-const ConfigurationSideContainer = styled.div`
+const StepsContainer = styled.div`
   width: 100%;
   padding: 0rem 1rem 2rem 1rem;
   overflow-y: auto;
@@ -23,11 +23,12 @@ const ConfigurationSideContainer = styled.div`
   }
 `;
 
-export default function Configuration() {
+export default function Steps() {
   return (
-    <ConfigurationSideContainer>
+    <StepsContainer>
       {/* <InvoiceViewer /> */}
       {/* <Collections /> */}
+
       <Couleurs />
       <Facades />
       <Mecanismes />
@@ -36,6 +37,6 @@ export default function Configuration() {
       <Prises />
       <Gravures />
       <Socials />
-    </ConfigurationSideContainer>
+    </StepsContainer>
   );
 }

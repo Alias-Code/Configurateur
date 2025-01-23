@@ -1,7 +1,7 @@
-import Steps from "../configuration/config-side/StepContainer.jsx";
 import productInformations from "../../config/productInformations.js";
 import styled from "@emotion/styled";
 import { Grid } from "@mui/material";
+import Step from "../configuration/config-side/Step.jsx";
 
 const PriseParagraph = styled.p`
   padding-right: 1rem;
@@ -9,12 +9,16 @@ const PriseParagraph = styled.p`
   font-size: 10px;
   text-align: center;
   margin-top: 0.25rem;
+
+  @media (max-width: 600px) {
+    font-size: 5px;
+  }
 `;
 
 export default function Prises() {
   return (
     <Grid container>
-      <Steps
+      <Step
         name="NOS MECANISMES DE PRISES"
         description="Choisissez le type de prises parmi notre large gamme de choix."
         category="prises">
@@ -34,7 +38,7 @@ export default function Prises() {
             <PriseParagraph>{item.name.replace("Prise ", "")}</PriseParagraph>
           </Grid>
         ))}
-      </Steps>
+      </Step>
     </Grid>
   );
 }

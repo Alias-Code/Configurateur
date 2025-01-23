@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import TableauDeBord from "./sections/TableauDeBord";
-import Commandes from "./sections/Orders/Orders";
+import Commandes from "./sections/orders/Orders";
 import Devis from "./sections/Invoices";
 import DetailsDuCompte from "./sections/DetailsDuCompte";
-import Adresses from "./sections/Adresses/Address";
+import Adresses from "./sections/adresses/Address";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 const ContentContainer = styled.div`

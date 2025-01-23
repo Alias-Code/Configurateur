@@ -8,6 +8,7 @@ const SocialsContainer = styled.div`
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 3rem;
+  margin-bottom: 1rem;
 
   img {
     width: 25%;
@@ -33,22 +34,22 @@ const SocialsContainer = styled.div`
 export default function Socials() {
   return (
     <SocialsContainer>
-      <img src="logo_lumicrea.png" alt="Logo de marque LUMICREA" />
+      <img src="/logo_lumicrea.png" alt="Logo de marque LUMICREA" />
       <div>
         <a href="https://instagram.com/lumicrea.officiel" target="_blank">
-          <img src="instagram.svg" alt="Logo de marque Instagram" />
+          <img src="/instagram.svg" alt="Logo de marque Instagram" />
         </a>
         <a href="https://facebook.com/lumicrea.officiel" target="_blank">
-          <img src="facebook.svg" alt="Logo de marque Facebook" />
+          <img src="/facebook.svg" alt="Logo de marque Facebook" />
         </a>
         <a href="https://youtube.com/@lumicreasociete269" target="_blank">
-          <img src="youtube.svg" alt="Logo de marque YouTube" />
+          <img src="/youtube.svg" alt="Logo de marque YouTube" />
         </a>
         <a href="https://linkedin.com/company/lumicrea" target="_blank">
-          <img src="linkedin.svg" alt="Logo de marque LinkedIn" />
+          <img src="/linkedin.svg" alt="Logo de marque LinkedIn" />
         </a>
         <a href="https://pinterest.fr/lumicreafr/_created/" target="_blank">
-          <img src="pinterest.svg" alt="Logo de marque Pinterest" />
+          <img src="/pinterest.svg" alt="Logo de marque Pinterest" />
         </a>
       </div>
     </SocialsContainer>

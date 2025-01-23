@@ -45,9 +45,9 @@ export function useAddChoice() {
     const facadeNumber = parseInt(choices.facade.id.slice("-1"));
     const isPlaque = getCategory(identifier) === "Facades";
 
-    // SI ON REVIENT EN ARRIERE
+    // SI ON REVIENT EN ARRIERE DANS UN EMPLACEMENT DE PLAQUE
 
-    if (isPlaque && newFacadeNumber < facadeNumber) {
+    if (isPlaque && newFacadeNumber < facadeNumber && emplacementIsFull(choices.facades[newFacadeNumber - 1])) {
       setSelectedFacade(newFacadeNumber);
       return;
     }
@@ -61,7 +61,7 @@ export function useAddChoice() {
 
           setSelectedFacade(facade.id);
         } else if (isPlaque && facade.id <= newFacadeNumber) {
-          // AVANCEMENT VIA UN AJOUT D'EMPLACEMENT, ON CHECK LA NOUVELLE FACADE NUMBER
+          // AVANCEMENT VIA UNE AUGMENTATION DE FACADE, ON CHECK LA NOUVELLE FACADE NUMBER
 
           setSelectedFacade(facade.id);
         }
@@ -86,7 +86,7 @@ export function useAddChoice() {
 
     if (category !== "Couleurs" && !choices.couleur.name) {
       setNotifications({
-        content: "Veuillez d'abord séléctionner une couleur et une façade.",
+        content: "Veuillez d'abord séléctionner une couleur puis une façade.",
         type: "error",
       });
       return;
@@ -133,12 +133,12 @@ export function useAddChoice() {
         const newFacadeNumber = parseInt(identifier.slice("-1"));
         const { width, height, ...newFacadeItem } = facadeItem;
 
-        setNotifications({
-          content: `Vous avez sélectionné une façade ${
-            newFacadeNumber === 1 ? "simple" : newFacadeNumber === 2 ? "double" : "triple"
-          }`,
-          type: "success",
-        });
+        // setNotifications({
+        //   content: `Vous avez sélectionné une façade ${
+        //     newFacadeNumber === 1 ? "simple" : newFacadeNumber === 2 ? "double" : "triple"
+        //   }`,
+        //   type: "success",
+        // });
 
         const updatedFacades = [...choices.facades];
 
@@ -195,13 +195,15 @@ export function useAddChoice() {
 
     if (isGravure && totalGravures >= facadeNumber * MAX_GRAVURE_PER_PLAQUE) {
       setNotifications({
-        content: "Vous avez atteint le maximum de gravures par emplacement.",
+        content: "Vous avez atteint le maximum de gravures.",
         type: "error",
       });
       return;
     }
 
     if (!isGravure) {
+      // --- BLOCAGE DE QUANTITÉ ---
+
       if (existingItem) {
         if (existingItem.quantity >= 2 || totalItems >= 2) {
           setNotifications({
@@ -227,39 +229,26 @@ export function useAddChoice() {
         });
         return;
       }
+
+      // --- BLOCAGE COMBINAISON IMPOSSIBLE ---
+
+      const hasPrise = currentFacade.prises.some((p) => p.id.includes("P-"));
+      const hasInterrupteurs =
+        currentFacade.cylindres.some((c) => c.id.includes("C-")) ||
+        currentFacade.retros.some((r) => r.id.includes("R-"));
+
+      if (
+        (category === "Prises" && hasInterrupteurs) ||
+        ((category === "Gravures" || category === "Retros") && hasPrise)
+      ) {
+        setNotifications({
+          content:
+            "Combinaison impossible, vous ne pouvez pas mettre un mécanisme de courant faible à côté d'un courant fort.",
+          type: "error",
+        });
+        return;
+      }
     }
-
-    // --- DEPLACEMENT AUTO DE LA FACADE ---
-
-    // const emplacementisFull = () => {
-    //   if (hasCourantPrise || totalItems) {
-    //     return true;
-    //   } else {
-    //     return false;
-    //   }
-    // };
-
-    // if (isCourantPrise || totalItems >= 1) {
-    //   if (
-    //     !choices.facade.name.includes("Simple") &&
-    //     ((choices.facade.name.includes("Double") && selectedFacade !== 2) ||
-    //       (choices.facade.name.includes("Triple") && selectedFacade !== 3))
-    //   ) {
-    //     setNotifications({
-    //       content: "Votre emplacement est plein, vous avez été redirigé automatiquement vers l'emplacement suivant.",
-    //       type: "success",
-    //     });
-    //   }
-
-    //   if (
-    //     (selectedFacade === 1 && choices.facade.name.includes("Double")) ||
-    //     (selectedFacade === 1 && choices.facade.name.includes("Triple"))
-    //   ) {
-    //     setSelectedFacade(2);
-    //   } else if (selectedFacade === 2 && choices.facade.name.includes("Triple")) {
-    //     setSelectedFacade(3);
-    //   }
-    // }
 
     // --- ADD OR UPDATE ITEM IN CHOICES ---
 
