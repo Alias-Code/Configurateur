@@ -232,9 +232,34 @@ export const generateInvoice = async (req, res, params) => {
     const globalStyle = { size: 9, font: helveticaFont, color: rgb(0, 0, 0) };
     const page = pdfDoc.getPages()[0];
     const { height } = page.getSize();
-    const dateFr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    let currentPage = page;
 
-    const drawText = (text, options) => page.drawText(text, { ...globalStyle, ...options });
+    const dateFr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    let drawText = (text, options) => currentPage.drawText(text, { ...globalStyle, ...options });
+
+    // FUNCTION CREATION DE PAGE SUPPLEMENTAIRE
+
+    const createNewPage = () => {
+      // Get the size from the template page
+      const templatePage = pdfDoc.getPages()[0];
+      const { width, height } = templatePage.getSize();
+
+      // Create new page with explicit dimensions
+      const newPage = pdfDoc.addPage([width, height]);
+
+      // Duplicate the header on the new page
+      const drawTextNewPage = (text, options) => newPage.drawText(text, { ...globalStyle, ...options });
+
+      // Reproduce the header
+      drawTextNewPage(`${headerTitle} (Suite)`, { font: helveticaBold, size: 12, x: 315, y: height - 70 });
+      drawTextNewPage(dateFr, { font: helveticaBold, size: 12, x: 315, y: height - 85 });
+
+      return {
+        page: newPage,
+        startY: height - 305,
+        drawText: drawTextNewPage,
+      };
+    };
 
     // --- HEADER ---
 
@@ -269,10 +294,22 @@ export const generateInvoice = async (req, res, params) => {
 
     let y = height - 305;
     let totalTTC = 0;
+    const minY = 250;
 
     const cartArray = Object.values(cart);
 
     for (const [configIndex, config] of Object.entries(cartArray)) {
+      const requiredHeight = 15;
+
+      // SI LA TAILLE MAX EST ATTEINTE, ON CREE UNE NOUVELLE PAGE
+
+      if (y - requiredHeight < minY) {
+        const newPageData = createNewPage();
+        currentPage = newPageData.page;
+        drawText = (text, options) => currentPage.drawText(text, { ...globalStyle, ...options });
+        y = newPageData.startY;
+      }
+
       // INCREMENTER TOTAL PAR PRIX CONFIG UNITAIRE
 
       const configTotal = calculateConfigTotal(config);
@@ -332,7 +369,6 @@ export const generateInvoice = async (req, res, params) => {
       // DETAILS FACADE
       config.facades.forEach((facade, index) => {
         if (["cylindres", "retros", "prises", "gravures"].some((category) => facade[category]?.length)) {
-          // drawText(`Plaque ${index + 1}`, { x: columnPositions.description, y });
           y -= 0;
 
           ["cylindres", "retros", "prises", "gravures"].forEach((category) => {

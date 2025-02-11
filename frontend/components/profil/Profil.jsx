@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import MainNavbar from "../configuration/config-side/Navigation/MainNavbar.jsx";
+import MainNavbar from "../configuration/config-side/navigation/MainNavbar.jsx";
 import Navigation from "./Navigation.jsx";
 import Content from "./Dashboard.jsx";
 import { useMediaQueries } from "../../config/config.js";

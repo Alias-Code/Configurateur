@@ -7,7 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { Grid } from "@mui/material";
 import { useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { useAnimationContext } from "../../../Context/AnimationContext.jsx";
+import { useAnimationContext } from "../../../context/AnimationContext.jsx";
 import { useMediaQueries } from "../../../config/config.js";
 
 productInformations.Couleurs.forEach((item) => {

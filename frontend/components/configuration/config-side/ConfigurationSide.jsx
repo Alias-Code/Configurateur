@@ -1,9 +1,9 @@
 import styled from "@emotion/styled";
 import Steps from "./Steps";
-import NavbarComponent from "./Navigation/MainNavbar";
+import NavbarComponent from "./navigation/MainNavbar";
 import { useMediaQuery, useTheme } from "@mui/material";
 import MobileRenderPreview from "../render-side/MobileRenderPreview";
-import AccountButton from "./Navigation/AccountButton";
+import AccountButton from "./navigation/AccountButton";
 import { useCallback, useEffect, useState } from "react";
 
 const ConfigurationSideContainer = styled.div`

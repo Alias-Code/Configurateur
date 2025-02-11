@@ -8,9 +8,9 @@ import { useTheme } from "@emotion/react";
 const FormGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 2rem;
   margin-bottom: 1rem;
-  width: 100%;
+  width: 70%;
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -46,7 +46,7 @@ const Input = styled.input`
   color: ${({ theme }) => theme.textColor};
 
   &:focus {
-    border-color: ${({ theme }) => theme.borderColor};
+    border-color: #cfaa60;
   }
 
   &:not(:placeholder-shown) {

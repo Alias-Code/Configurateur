@@ -13,7 +13,6 @@ const ResumeContainer = styled.div`
   width: 100%;
 
   p {
-    font-weight: 100;
     letter-spacing: 2px;
     font-size: 0.6rem;
   }

@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 *,
 *::before,
 *::after {
@@ -99,6 +99,10 @@ button {
   border: none;
   padding: 0;
   cursor: pointer;
+}
+
+p {
+  font-family: "Raleway", serif;
 }
 
 ::-webkit-scrollbar {
