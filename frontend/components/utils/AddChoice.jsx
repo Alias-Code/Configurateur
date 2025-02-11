@@ -204,12 +204,26 @@ export function useAddChoice() {
 
     // --- VERIFICATION LISEUSES ---
 
-    if (category === "Liseuses" && selectedFacade !== 1) {
-      setNotifications({
-        content: "Vous ne pouvez mettre de liseuse qu'au premier emplacement.",
-        type: "error",
-      });
-      return;
+    const totalLiseuses = choices.facades.reduce((total, facade) => {
+      return total + facade.liseuses.length;
+    }, 0);
+
+    if (category === "Liseuses") {
+      if (totalLiseuses >= 1) {
+        setNotifications({
+          content: "Vous ne pouvez ajouter qu'une seule liseuse au total.",
+          type: "error",
+        });
+        return;
+      }
+
+      if (choices.facade.id.includes("V-") && selectedFacade !== 1) {
+        setNotifications({
+          content: "Vous ne pouvez pas placer de liseuse à cet endroit.",
+          type: "error",
+        });
+        return;
+      }
     }
 
     // --- VERIFICATIONS GRAVURES ---
