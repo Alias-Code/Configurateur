@@ -264,8 +264,8 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
   // --- RESPONSIVE FUNCTIONS ---
 
   function getModelScale() {
-    if (IS_XS) return 0.043;
-    if (IS_SM) return 0.045;
+    if (IS_XS) return 0.045;
+    if (IS_SM) return 0.048;
     if (IS_MD) return 0.05;
     return 0.05;
   }
@@ -273,7 +273,7 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
   const getAdjustedMoveValue = (moveValue) => {
     const isPositive = moveValue < 0 ? false : true;
 
-    if (IS_XS) return moveValue * 1;
+    if (IS_XS) return isPositive ? moveValue * 1.25 : moveValue / 0.95;
     if (IS_SM) return isPositive ? moveValue * 1 : moveValue / 1.4;
     if (IS_MD) return isPositive ? moveValue * 1.2 : moveValue / 1.5;
     if (UP_XL) return isPositive ? moveValue * 1 : moveValue / 1.175;

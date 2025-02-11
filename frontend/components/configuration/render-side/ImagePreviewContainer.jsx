@@ -1,10 +1,13 @@
 import styled from "@emotion/styled";
 import Mecanisme from "./Mecanisme";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { keyframes, css } from "@emotion/react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useChoicesContext } from "../../../context/ChoicesContext";
 import { useCartContext } from "../../../context/CartContext";
+import { useAnimationContext } from "../../../context/AnimationContext";
+import { useMediaQueries } from "../../../config/config";
+import { ITEM_CATEGORYS } from "../../../config/config";
 
 const ImageContainer = styled.div`
   position: relative;
@@ -89,10 +92,37 @@ const CloseButton = styled.p`
   }
 `;
 
+const moveToCart = (cartRef) => keyframes`
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(
+      ${cartRef.getBoundingClientRect().x - window.innerWidth + 225}px,
+      ${cartRef.getBoundingClientRect().y - 200}px
+    ) scale(0);
+    opacity: 0.5;
+  }
+`;
+
+const AnimatedImage = styled.img`
+  position: fixed;
+  top: 0%;
+  right: 0%;
+  height: auto;
+  animation: ${(props) => moveToCart(props.cartRef)} 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  width: 25% !important;
+  z-index: 9999999999999999999999 !important;
+`;
+
 export default function ImagePreviewContainer({ type, renderRef }) {
   const { choices, selectedFacade, setSelectedFacade, renderImage, menu, setMenu, idToImageName } = useChoicesContext();
-  const { calculateTotalItems } = useCartContext();
+  const { cartImageAnimation, imageAnimation, setImageAnimation, setActiveTab } = useAnimationContext();
   const { setNotifications } = useNotificationsContext();
+  const { emplacementIsFull } = useCartContext();
+  const { IS_MOBILE } = useMediaQueries();
 
   const numberOfFacade = parseInt(choices.facade.id.slice(-1));
 
@@ -100,11 +130,11 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     simple: {
       neutre: {
         unemplacement: {
-          1: { positionY: "49%", positionX: "50.25%" },
+          1: { positionY: "49.25%", positionX: "50%" },
         },
         deuxemplacements: {
-          1: { positionY: "49.5%", positionX: "44%" },
-          2: { positionY: "48.75%", positionX: "56.5%" },
+          1: { positionY: "49.25%", positionX: "44.5%" },
+          2: { positionY: "48.75%", positionX: "54.5%" },
         },
       },
     },
@@ -112,14 +142,14 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     double: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "50%", positionX: "35%" },
-          2: { positionY: "48%", positionX: "65%" },
+          1: { positionY: "50%", positionX: "37%" },
+          2: { positionY: "48.5%", positionX: "63%" },
         },
         deuxemplacements: {
-          1: { positionY: "50%", positionX: "30%" },
-          2: { positionY: "49.5%", positionX: "42%" },
-          3: { positionY: "49%", positionX: "59%" },
-          4: { positionY: "48.5%", positionX: "71%" },
+          1: { positionY: "50%", positionX: "31%" },
+          2: { positionY: "49.4%", positionX: "41%" },
+          3: { positionY: "49%", positionX: "57%" },
+          4: { positionY: "48.5%", positionX: "67%" },
         },
       },
       verticale: {
@@ -128,10 +158,10 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           2: { positionY: "63%", positionX: "51.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "37%", positionX: "42%" },
+          1: { positionY: "37%", positionX: "44%" },
           2: { positionY: "36.5%", positionX: "54%" },
-          3: { positionY: "63%", positionX: "46%" },
-          4: { positionY: "62.3%", positionX: "58%" },
+          3: { positionY: "63%", positionX: "47%" },
+          4: { positionY: "62.3%", positionX: "57%" },
         },
       },
     },
@@ -139,17 +169,17 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     triple: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "51%", positionX: "21.5%" },
-          2: { positionY: "49%", positionX: "50%" },
-          3: { positionY: "47%", positionX: "78%" },
+          1: { positionY: "51%", positionX: "25.5%" },
+          2: { positionY: "49.5%", positionX: "50%" },
+          3: { positionY: "48%", positionX: "74%" },
         },
         deuxemplacements: {
-          1: { positionY: "51%", positionX: "17%" },
-          2: { positionY: "50.5%", positionX: "29%" },
+          1: { positionY: "51%", positionX: "21%" },
+          2: { positionY: "50.5%", positionX: "31%" },
           3: { positionY: "49.5%", positionX: "44%" },
-          4: { positionY: "49%", positionX: "56%" },
-          5: { positionY: "48%", positionX: "71%" },
-          6: { positionY: "47.5%", positionX: "83%" },
+          4: { positionY: "49%", positionX: "54%" },
+          5: { positionY: "48%", positionX: "68%" },
+          6: { positionY: "47.5%", positionX: "78%" },
         },
       },
       verticale: {
@@ -159,12 +189,12 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           3: { positionY: "76%", positionX: "54%" },
         },
         deuxemplacements: {
-          1: { positionY: "22%", positionX: "41%" },
-          2: { positionY: "21.5%", positionX: "53%" },
-          3: { positionY: "48%", positionX: "44%" },
-          4: { positionY: "47.3%", positionX: "56%" },
-          5: { positionY: "76%", positionX: "48%" },
-          6: { positionY: "75%", positionX: "60%" },
+          1: { positionY: "22%", positionX: "42%" },
+          2: { positionY: "21.5%", positionX: "52%" },
+          3: { positionY: "48.5%", positionX: "45.5%" },
+          4: { positionY: "48%", positionX: "55.5%" },
+          5: { positionY: "75.5%", positionX: "49%" },
+          6: { positionY: "75%", positionX: "59%" },
         },
       },
     },
@@ -178,16 +208,36 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     setSelectedFacade(number);
   }
 
+  function handleCloseMenu() {
+    setMenu(false);
+    setActiveTab(0);
+  }
+
   return (
     <ImageContainer ref={renderRef} data-render-container="true">
       {/* IMAGE DYNAMIQUE DES PLAQUES */}
+
       <img src={renderImage} alt="Rendu de la configuration" />
+
       {menu && (
-        <CloseButton className="no-screenshot" onClick={() => setMenu(false)}>
+        <CloseButton className="no-screenshot" onClick={handleCloseMenu}>
           <img src="/cancel.svg" alt="" />
         </CloseButton>
       )}
+
+      {/* ANIMATION IMAGE ADD TO CART */}
+
+      {imageAnimation && !IS_MOBILE && (
+        <AnimatedImage
+          src={imageAnimation}
+          alt="Produit ajouté au panier"
+          cartRef={cartImageAnimation.current}
+          onAnimationEnd={() => setImageAnimation(false)}
+        />
+      )}
+
       {/* ZONES DROPPABLE */}
+
       {/* {Array.from({ length: numberOfFacade }).map((_, index) => {
               const facadeType = choices.facade.name.split(" ")[1].toLowerCase();
               const facadeOrientation = choices.facade.name.split(" ")[2].toLowerCase();
@@ -197,7 +247,9 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                 <DroppableZone key={index} index={index} positionx={position.positionX} positiony={position.positionY} />
               );
             })} */}
+
       {/* FLECHES */}
+
       {type !== "mobilePreview" &&
         choices.facade.id &&
         Array.from({ length: numberOfFacade }).map((_, index) => {
@@ -205,26 +257,32 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           const facadeOrientation = choices.facade.name.split(" ")[2].toLowerCase();
           const position = mecanismeRenderPosition[facadeType][facadeOrientation]["unemplacement"][index + 1];
 
-          // Utilisation des variables "unemplacement" avec un ajout de 30 pour toujours être au milieu de chaque emplacement
+          // AJUSTEMENT DES FLECHES SELON PLUSIEURS FACTEURS POUR UN RENDU PARFAIT VU QUE LA PLAQUE EST EN PERSPECTIVE
+
+          const adjustArrowVerticale = index !== 0 && index - 1;
+          const adjustArrowHorizontale = index === 2 ? index - 1 : index;
 
           const positionX =
-            facadeOrientation === "verticale" ? parseInt(position.positionX) - 16 - index + "%" : position.positionX;
+            facadeOrientation === "verticale"
+              ? parseInt(position.positionX) - 16 - adjustArrowVerticale + "%"
+              : position.positionX;
 
           const positionY =
             facadeOrientation === "horizontale" || facadeOrientation === "neutre"
-              ? parseInt(position.positionY) - 27 + index + "%"
+              ? parseInt(position.positionY) - 21 + adjustArrowHorizontale + "%"
               : position.positionY;
 
-          // Rotation selon l'orientation verticale ou horizontale
+          // ROTATION DE LA FLECHE SELON L'ORIENTATION
+
           const rotateValue = facadeOrientation === "verticale" ? "-90deg" : "-5deg";
 
           const currentFacade = choices.facades[index];
-          const mecanismeQuantity = calculateTotalItems(currentFacade);
-          const hasCourantPrise = currentFacade.prises.some((p) => p.id.includes("P-C"));
 
           let glowColor = "207, 170, 96";
 
-          if ((hasCourantPrise && mecanismeQuantity >= 1) || (!hasCourantPrise && mecanismeQuantity >= 2)) {
+          // SI L'EMPLACEMENT EST PLEIN, LA FLECHE DEVIENT ROUGE
+
+          if (emplacementIsFull(currentFacade)) {
             glowColor = "179, 56, 43";
           }
 
@@ -253,107 +311,133 @@ export default function ImagePreviewContainer({ type, renderRef }) {
             </>
           );
         })}
+
       {/* LOGIQUE D'EMPLACEMENT DES MECANISMES */}
+
       {choices.facade.id &&
-        choices.facades.map((facade, index) => {
+        choices.facades.map((facade) => {
           const facadeId = facade.id;
           const facadeType = choices.facade.name.split(" ")[1].toLowerCase();
           const facadeOrientation = choices.facade.name.split(" ")[2].toLowerCase();
 
           const numberOfMecanisme =
-            facade.prises.reduce((sum, prise) => sum + prise.quantity, 0) +
-            facade.retros.reduce((sum, retro) => sum + retro.quantity, 0) +
-            facade.cylindres.reduce((sum, cylindre) => sum + cylindre.quantity, 0);
+            (facade?.prises?.reduce((sum, prise) => sum + prise.quantity, 0) || 0) +
+            (facade?.retros?.reduce((sum, retro) => sum + retro.quantity, 0) || 0) +
+            (facade?.cylindres?.reduce((sum, cylindre) => sum + cylindre.quantity, 0) || 0) +
+            (facade?.variateurs?.reduce((sum, variateur) => sum + variateur.quantity, 0) || 0) +
+            (facade?.liseuses?.reduce((sum, liseuses) => sum + liseuses.quantity, 0) || 0);
 
           const emplacementType = numberOfMecanisme === 1 ? "unemplacement" : "deuxemplacements";
 
-          // MECANISMES DE CHAQUE FACADE
+          const allMecanismes = ITEM_CATEGORYS.filter((category) => category !== "gravures").flatMap((category) =>
+            (facade?.[category] || []).map((m) => ({ ...m, type: category }))
+          );
 
-          const allMecanismes = [
-            ...facade.prises.map((m) => ({ ...m, type: "prise" })),
-            ...facade.retros.map((m) => ({ ...m, type: "retro" })),
-            ...facade.cylindres.map((m) => ({ ...m, type: "cylindre" })),
-          ];
+          // --- Initialise un compteur spécifique à chaque façade ---
+          let currentPositionIndex = 0;
 
           return (
-            <React.Fragment key={index}>
+            <React.Fragment key={facadeId}>
               {allMecanismes.map((mecanisme, mecanismeIndex) => {
-                // --- CALCULE A QUEL EMPLACEMENT COMMENCER POUR RECUPERER LES POSITIONS ---
+                const positionBase = mecanismeRenderPosition[facadeType][facadeOrientation][emplacementType];
 
-                const emplacementNumber = () => {
-                  if (emplacementType === "unemplacement") {
-                    return facadeId;
-                  }
+                // --- TAILLE DES MECANISMES SELON LE TYPE ---
 
-                  if (emplacementType === "deuxemplacements") {
-                    if (facadeId === 2) {
-                      return 3;
+                let size;
+
+                switch (true) {
+                  case mecanisme.name.includes("Courant"):
+                    size = 18;
+                    break;
+
+                  case mecanisme.name.includes("TV"):
+                    size = 19;
+                    break;
+
+                  case mecanisme.name.includes("Variateur"):
+                    size = 20;
+                    break;
+
+                  case mecanisme.name.includes("Liseuse"):
+                    size = 50;
+                    break;
+
+                  default:
+                    size = 20;
+                    break;
+                }
+
+                // --- COEF QUI AJUSTE LA TAILLE SELON l'ECRAN ---
+
+                const sizeOfMecanisme = size + "%";
+
+                return Array.from({ length: mecanisme.quantity }).map((_, quantityIndex) => {
+                  // --- CALCUL DE L'EMPLACEMENT A CHOISIR SELON L'OBJET MECANISM RENDER POSITION ---
+
+                  const emplacementNumber = () => {
+                    if (emplacementType === "unemplacement") {
+                      return facadeId;
                     }
-                    if (facadeId === 3) {
-                      return 5;
+
+                    if (emplacementType === "deuxemplacements") {
+                      if (facadeId === 1) {
+                        return 1;
+                      }
+                      if (facadeId === 2) {
+                        return 3;
+                      }
+                      if (facadeId === 3) {
+                        return 5;
+                      }
                     }
-                  }
+                  };
 
-                  return 1;
-                };
+                  const position = positionBase[emplacementNumber() + currentPositionIndex];
 
-                // --- CALCULE LA TAILLE DE L'IMAGE SELON SON TYPE ---
+                  currentPositionIndex += 1;
 
-                const sizeOfMecanisme = () => {
-                  if (mecanisme.name.includes("Courant")) {
-                    if (facadeOrientation === "verticale") {
-                      return "17%";
+                  // --- RENDU DE L'IMAGE DU MECANISME ---
+
+                  const imageSrc = `/mecanismes/${idToImageName(mecanisme.id + "_" + choices.couleur.id)}.png`;
+
+                  let adjustedXPosition = parseFloat(position?.positionX) || 50;
+                  let adjustedYPosition = parseFloat(position?.positionY) || 50;
+
+                  // RAPPROCHEMENT DES INTERRUPTEURS CYLINDRES ET RETROS
+
+                  if (mecanisme.id.includes("R-") || mecanisme.id.includes("C-")) {
+                    if (allMecanismes.length === 1 && mecanisme.quantity === 1) {
+                      adjustedXPosition += 1;
+                    } else if (currentPositionIndex === 1) {
+                      adjustedXPosition += facadeOrientation === "verticale" ? 2 : 2.5;
                     } else {
-                      return "21%";
+                      adjustedXPosition -= facadeOrientation === "verticale" ? 1.5 : 0.5;
                     }
-                  } else {
-                    return "20%";
                   }
-                };
 
-                // --- RECUPERE LA BONNE POSITION ---
+                  // AJUSTEMENT POSITION LISEUSE CAR SA TAILLE A GRANDEMENT CHANGEE
 
-                const position =
-                  mecanismeRenderPosition[facadeType][facadeOrientation][emplacementType][emplacementNumber()];
+                  if (mecanisme.id.includes("LI")) {
+                    adjustedYPosition += 19.5;
+                    adjustedXPosition += 10.5;
+                  }
 
-                // --- RECUPERATION DU MECANISME EN IMAGE ---
-
-                const imageSrc = "mecanismes/" + idToImageName(mecanisme.id + "_" + choices.couleur.id) + ".png";
-
-                const mecanismes = [
-                  <Mecanisme
-                    key={`${facadeId}-${mecanismeIndex}`}
-                    item={{ ...mecanisme, facadeId }}
-                    src={imageSrc}
-                    positionY={position?.positionY || "50%"}
-                    positionX={position?.positionX || "50%"}
-                    dimension={sizeOfMecanisme()}
-                    type={type}
-                  />,
-                ];
-
-                if (emplacementType === "deuxemplacements") {
-                  const position2 =
-                    mecanismeRenderPosition[facadeType][facadeOrientation][emplacementType][emplacementNumber() + 1];
-
-                  mecanismes.push(
+                  return (
                     <Mecanisme
-                      key={`${facadeId}-${mecanismeIndex}-2`}
+                      key={`${facadeId}-${currentPositionIndex}-${quantityIndex}`}
                       item={{ ...mecanisme, facadeId }}
                       src={imageSrc}
-                      positionY={position2?.positionY || "50%"}
-                      positionX={position2?.positionX || "50%"}
-                      dimension={sizeOfMecanisme()}
+                      positionY={`${adjustedYPosition}%`}
+                      positionX={`${adjustedXPosition}%`}
+                      dimension={sizeOfMecanisme}
                       type={type}
                     />
                   );
-                }
-
-                return mecanismes;
+                });
               })}
             </React.Fragment>
           );
-        })}{" "}
+        })}
     </ImageContainer>
   );
 }

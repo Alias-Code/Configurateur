@@ -28,7 +28,7 @@ const generateScrollAnimation = (calculationMiddle, isXs, upXXL) => keyframes`
 const Instruction = styled.img`
   position: absolute;
   top: 70%;
-  left: 85%;
+  left: 82%;
   width: 40px;
   height: 40px;
   pointer-events: none;

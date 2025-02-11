@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
-import html2canvas from "html2canvas";
 import SignIn from "../home/auth/SignIn";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./SharedStyle";
 import { useNotificationsContext } from "../../context/NotificationsContext";
 import { useChoicesContext } from "../../context/ChoicesContext";
@@ -11,23 +10,14 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useModalContext } from "../../context/ModalContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { createPortal } from "react-dom";
+import QuantityButton from "./QuantityButton";
+import Spinner from "../common/Spinner";
+import { useAddToCart } from "./AddToCart";
 
 const ResumeSummaryContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
-
-const CartIcon = styled.img`
-  width: 2rem;
-  height: 2rem;
-  margin-right: 0.75rem;
-  transition: filter 0.5s ease;
-  cursor: pointer;
-
-  &:hover {
-    filter: invert(48%) sepia(72%) saturate(200%) hue-rotate(77deg) brightness(105%) contrast(85%);
-  }
 `;
 
 const TrashIcon = styled.img`
@@ -44,6 +34,19 @@ const TrashIcon = styled.img`
 const CartContainer = styled.div`
   display: flex;
   align-items: center;
+
+  .cartButton {
+    &:hover {
+      img {
+        filter: invert(48%) sepia(72%) saturate(200%) hue-rotate(77deg) brightness(105%) contrast(85%);
+      }
+    }
+
+    img {
+      width: 1.8rem;
+      transition: filter 0.5s ease;
+    }
+  }
 `;
 
 const PrixContainer = styled.div`
@@ -52,50 +55,12 @@ const PrixContainer = styled.div`
   /* PRIX TOTAL FINAL_CART PLUS GRAND QUE LE PRIX AFFICHÉ PLUSIEURS FOIS POUR CHAQUE CONFIG */
 
   p {
-    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.7rem, 2vw, 0.9rem)" : "clamp(0.4rem, 2vw, 0.6rem)")};
+    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.7rem, 2vw, 0.8rem)" : "clamp(0.4rem, 2vw, 0.6rem)")};
   }
 
   .totalTTC {
-    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.9rem, 3vw, 1.1rem)" : "clamp(0.6rem, 3vw, 0.8rem)")};
+    font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.9rem, 3vw, 1rem)" : "clamp(0.6rem, 3vw, 0.8rem)")};
     font-weight: 700;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  margin-right: 0.75rem;
-  border: 1px solid white;
-  border-radius: 10px;
-  font-weight: bold;
-  height: 2.2rem;
-  width: auto;
-
-  button {
-    color: white;
-    font-size: 1rem;
-    padding: 0.4rem 0.6rem;
-    transform: scale(1);
-    transition: transform 0.5s ease;
-    cursor: pointer;
-
-    &:hover {
-      transition: transform 0.5s ease;
-      transform: scale(1.3);
-    }
-  }
-
-  input {
-    width: 2rem;
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 1rem;
-    text-align: center;
-
-    &:focus {
-      outline: none;
-    }
   }
 `;
 
@@ -108,192 +73,26 @@ const FinalButtonsContainer = styled.div`
   }
 `;
 
-export default function ResumeSummary({ renderRef, priceHT, type, quantity, itemIndex }) {
+export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
   // --- ÉTATS ET RÉFÉRENCES ---
 
-  const { checkoutAnimation, setCheckoutAnimation } = useAnimationContext();
-  const { choices, setChoices, resetConfig, setMenu } = useChoicesContext();
-  const { configurations, setConfigurations, calculateAllTotalItems, calculateTotalItems } = useCartContext();
+  const { setCheckoutAnimation } = useAnimationContext();
+  const { choices } = useChoicesContext();
+  const { configurations } = useCartContext();
   const { setNotifications } = useNotificationsContext();
   const { isAuthenticated } = useAuthContext();
   const { openModal } = useModalContext();
+  const addToCart = useAddToCart();
 
   const [isSignInOpen, setSignInOpen] = useState(false);
   const [isSignUpOpen, setSignUpOpen] = useState(false);
   const [modalAnimation, setModalAnimation] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [number, setNumber] = useState(1);
 
-  const [imageData, setImageData] = useState(null);
-
-  const [number, setNumber] = useState(type === "cart" ? quantity : choices.quantity);
-
-  // --- INCREASE NUMBER CHOICES OR DIRECTLY FROM CART ---
-
-  const increaseNumber = () => {
-    if (type === "resume") {
-      setChoices((prevChoices) => ({
-        ...prevChoices,
-        quantity: prevChoices.quantity < 999 ? prevChoices.quantity + 1 : prevChoices.quantity,
-      }));
-      setNumber((prevNumber) => (prevNumber < 999 ? prevNumber + 1 : prevNumber));
-    } else {
-      let panier = localStorage.getItem("configurations");
-      panier = JSON.parse(panier);
-
-      const newQuantity = panier[`config${itemIndex}`].quantity + 1;
-
-      if (newQuantity < 999) {
-        panier[`config${itemIndex}`].quantity = newQuantity;
-        localStorage.setItem("configurations", JSON.stringify(panier));
-        setConfigurations(JSON.stringify(panier));
-        setNumber(newQuantity);
-      }
-    }
-  };
-
-  const decreaseNumber = () => {
-    if (type === "resume") {
-      setChoices((prevChoices) => ({
-        ...prevChoices,
-        quantity: prevChoices.quantity > 1 ? prevChoices.quantity - 1 : prevChoices.quantity,
-      }));
-      setNumber((prevNumber) => (prevNumber > 1 ? prevNumber - 1 : prevNumber));
-    } else {
-      let panier = localStorage.getItem("configurations");
-      panier = JSON.parse(panier);
-
-      if (panier[`config${itemIndex}`].quantity > 1) {
-        const newQuantity = quantity - 1;
-
-        panier[`config${itemIndex}`].quantity = newQuantity;
-        localStorage.setItem("configurations", JSON.stringify(panier));
-
-        setConfigurations(JSON.stringify(panier));
-        setNumber(newQuantity);
-      }
-    }
-  };
-
-  const handleChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0 && value < 999) {
-      setNumber(value);
-
-      if (type === "resume") {
-        setChoices((prevChoices) => ({
-          ...prevChoices,
-          quantity: value,
-        }));
-      } else {
-        let panier = localStorage.getItem("configurations");
-        panier = JSON.parse(panier);
-        panier[`config${itemIndex}`].quantity = value;
-        localStorage.setItem("configurations", JSON.stringify(panier));
-        setConfigurations(JSON.stringify(panier));
-      }
-    }
-  };
-
-  // --- ADD TO CART ---
-
-  const handleAddToCart = (quantity) => {
-    if (renderRef.current) {
-      // --- VERIFICATION EMPLACEMENT VIDE ---
-
-      if (!choices.facade.id && !choices.facade.couleur && !calculateAllTotalItems(choices)) {
-        setNotifications({ content: "Vous ne pouvez pas ajouter une configuration vide au panier.", type: "error" });
-        return;
-      }
-
-      const facadeId = choices.facade.id;
-
-      if (!facadeId.includes("1")) {
-        if (calculateAllTotalItems() === 0) {
-          setNotifications({
-            content: "Vous ne pouvez pas ajouter une façade vide au panier, sauf pour la façade simple.",
-            type: "error",
-          });
-          return;
-        }
-
-        const facadesToCheck = facadeId.includes("2") ? 2 : facadeId.includes("3") ? 3 : 0;
-
-        for (let i = 0; i < facadesToCheck; i++) {
-          if (calculateTotalItems(choices.facades[i]) === 0) {
-            setNotifications({
-              content: "Vous ne pouvez pas ajouter une façade au panier avec un emplacement vide.",
-              type: "error",
-            });
-            return;
-          }
-        }
-      }
-
-      // --- OPTIONS CANVA ---
-
-      const options = {
-        backgroundColor: null,
-        scale: window.devicePixelRatio,
-        useCORS: true,
-        width: renderRef.current.offsetWidth,
-        height: renderRef.current.offsetHeight,
-        logging: false,
-        removeContainer: true,
-        allowTaint: true,
-        foreignObjectRendering: false,
-        ignoreElements: (element) => {
-          return element.classList.contains("no-screenshot");
-        },
-      };
-
-      html2canvas(renderRef.current, options)
-        .then((canvas) => {
-          // --- CREATE CANVA ---
-
-          const finalCanvas = document.createElement("canvas");
-          const ctx = finalCanvas.getContext("2d");
-
-          finalCanvas.width = renderRef.current.offsetWidth;
-          finalCanvas.height = renderRef.current.offsetHeight;
-
-          ctx.drawImage(canvas, 0, 0, finalCanvas.width, finalCanvas.height);
-
-          const quality = 0.7;
-          const base64ImageData = finalCanvas.toDataURL("image/jpeg", quality);
-
-          setImageData(base64ImageData);
-
-          // --- ADD TO CART ---
-
-          let panier = localStorage.getItem("configurations");
-          panier = panier ? JSON.parse(panier) : {};
-
-          const newItem = { quantity, ...choices, image: base64ImageData };
-
-          if (Object.keys(panier).length === 0) {
-            panier.config1 = newItem;
-          } else {
-            const lastItemKey = Object.keys(panier).pop();
-            const lastItemNumber = parseInt(lastItemKey.replace("config", ""), 10);
-            const nextItemNumber = lastItemNumber + 1;
-            panier[`config${nextItemNumber}`] = newItem;
-          }
-
-          localStorage.setItem("configurations", JSON.stringify(panier));
-
-          setNotifications({ content: "Vous avez bien ajouté votre produit au panier !", type: "success" });
-
-          resetConfig(type);
-          setNumber(1);
-
-          // FERMETURE DU MENU POUR LES MOBILES
-
-          setMenu(false);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la capture du canevas :", error);
-        });
-    }
-  };
+  useEffect(() => {
+    setNumber(type === "cart" ? quantity : number);
+  }, []);
 
   // --- OPEN SIGN IN ---
 
@@ -386,16 +185,19 @@ export default function ResumeSummary({ renderRef, priceHT, type, quantity, item
             {/* QUANTITE POUR PRODUIT UNITAIRE */}
 
             {type !== "final_cart" && type !== "history" && (
-              <ButtonContainer checkoutAnimation={checkoutAnimation}>
-                <button onClick={decreaseNumber}>-</button>
-                <input type="text" value={number} onChange={handleChange} />
-                <button onClick={increaseNumber}>+</button>
-              </ButtonContainer>
+              <QuantityButton number={number} setNumber={setNumber} type={type} itemIndex={itemIndex} />
             )}
 
             {type === "resume" ? (
               // --- RENDER ---
-              <CartIcon onClick={() => handleAddToCart(number)} src="/cart.svg" alt="" />
+              <Button
+                className="cartButton"
+                borderColor={"white"}
+                bgColorHover={"transparent"}
+                onClick={() => addToCart(number, setNumber, type)}>
+                {loading && <Spinner />}
+                <img src="/cart.svg" alt="Icone d'ajout au panier" />
+              </Button>
             ) : type === "cart" ? (
               // --- INDIVIDUAL CART ---
               <TrashIcon

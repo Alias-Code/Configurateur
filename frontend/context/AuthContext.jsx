@@ -5,8 +5,8 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   // --- ÉTATS ET RÉFÉRENCES ---
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userToken, setUserToken] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [userToken, setUserToken] = useState(true);
   const [skipHome, setSkipHome] = useState(false);
   const { setEntryAnimation } = useAnimationContext();
 

@@ -1,111 +1,87 @@
 import styled from "@emotion/styled";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useModalContext } from "../../../context/ModalContext";
 
 const MecanismeImage = styled.div`
   position: absolute;
-  top: ${({ positiony }) => positiony};
+  top: ${({ positiony, getup }) => (getup ? `calc(${positiony} - 1%)` : positiony)};
   left: ${({ positionx }) => positionx};
-  transform: translate(-50%, -50%) rotate(-1deg);
+  transform: translate(-50%, -50%);
   width: ${({ dimension }) => dimension};
   height: ${({ dimension }) => dimension};
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99999999;
+  z-index: ${({ index }) => index};
   transition: all 0.5s ease;
 `;
 
-const CrossImage = styled.img`
+const CancelZone = styled.div`
+  position: absolute;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  cursor: pointer;
+  pointer-events: auto;
+  top: ${({ positiony }) => positiony};
+  left: ${({ positionx }) => positionx};
+  transform: translate(-50%, -50%);
+`;
+
+const CancelImage = styled.img`
   width: 1.2rem !important;
   height: 1.2rem;
-  z-index: 99999999;
-  position: absolute;
   border-radius: 40%;
-  backdrop-filter: blur(3px);
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.5s ease;
+  backdrop-filter: blur(2px);
+  opacity: ${({ hovered }) => (hovered ? 1 : 0)};
+  visibility: ${({ hovered }) => (hovered ? "visible" : "hidden")};
+  transition: all 0.3s ease;
   cursor: pointer;
-
-  ${({ hovered }) =>
-    hovered &&
-    `
-    opacity: 1;
-    visibility: visible;
-  `}
-
   &:hover {
     transform: scale(1.2);
   }
 `;
 
 const Mecanisme = ({ src, positionY, positionX, dimension, item, type }) => {
-  const { openModal } = useModalContext();
-  const [svgElement, setSvgElement] = useState(null);
   const [isHovered, setHovered] = useState(false);
-  const svgContainerRef = useRef(null);
+  const [index, setIndex] = useState(1000);
+  const [cancelPosition, setCancelPosition] = useState({ x: positionX, y: positionY });
+  const { openModal } = useModalContext();
 
-  const handleMouseEnter = () => {
-    setTimeout(() => {
-      setHovered(true);
-    }, 10);
-  };
+  const getUp = item.id.includes("TV");
 
-  const handleMouseLeave = () => {
-    setTimeout(() => {
-      setHovered(false);
-    }, 10);
-  };
-
-  // useEffect(() => {
-  //   const loadSvg = async () => {
-  //     try {
-  //       const response = await fetch(src, {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "image/svg+xml",
-  //           "Cross-Origin": "anonymous",
-  //         },
-  //       });
-  //       const svgText = await response.text();
-  //       const parser = new DOMParser();
-  //       const svgDoc = parser.parseFromString(svgText, "image/svg+xml");
-  //       const svgElement = svgDoc.documentElement;
-  //       setSvgElement(svgElement);
-  //     } catch (error) {
-  //       console.error("Erreur lors du chargement du SVG:", error);
-  //     }
-  //   };
-
-  //   loadSvg();
-  // }, [src]);
-
-  // useEffect(() => {
-  //   if (svgElement && svgContainerRef.current) {
-  //     svgContainerRef.current.innerHTML = "";
-  //     svgContainerRef.current.appendChild(svgElement);
-  //   }
-  // }, [svgElement]);
+  useEffect(() => {
+    if (item.id.includes("LI-")) {
+      const x = `${parseFloat(positionX) - 10}%`;
+      const y = `${parseFloat(positionY) - 20}%`;
+      setCancelPosition({ x, y });
+      setIndex(2000);
+    } else {
+      setCancelPosition({ x: positionX, y: positionY });
+    }
+  }, [item, positionX, positionY]);
 
   return (
-    <MecanismeImage
-      ref={svgContainerRef}
-      positiony={positionY}
-      positionx={positionX}
-      dimension={dimension}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}>
-      <img src={src} alt="" />
-      {isHovered && type !== "mobilePreview" && (
-        <CrossImage
-          hovered={isHovered}
+    <div>
+      <CancelZone
+        positiony={cancelPosition.y}
+        positionx={cancelPosition.x}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}>
+        <CancelImage
+          hovered={isHovered && type !== "mobilePreview"}
           onClick={() => openModal({ type: "preview", data: item })}
           src="/cancel.svg"
           alt="Suppression de l'item"
         />
-      )}
-    </MecanismeImage>
+      </CancelZone>
+      <MecanismeImage positiony={positionY} positionx={positionX} dimension={dimension} getup={getUp} index={index}>
+        <img src={src} alt="Image du mécanisme" />
+      </MecanismeImage>
+    </div>
   );
 };
 

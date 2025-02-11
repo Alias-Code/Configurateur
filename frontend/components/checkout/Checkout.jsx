@@ -8,6 +8,17 @@ import Adresses from "../profil/sections/adresses/Address";
 import Spinner from "../common/Spinner";
 import React, { useState, useEffect } from "react";
 import { useNotificationsContext } from "../../context/NotificationsContext";
+import { useMediaQueries } from "../../config/config";
+
+const CheckoutContainer = styled.div`
+  margin: 0 auto;
+  width: 55%;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    width: 85%;
+  }
+`;
 
 const CheckoutHeader = styled.div`
   position: relative;
@@ -129,7 +140,7 @@ const CheckoutButton = styled.button`
   }
 
   p {
-    font-size: 20px;
+    font-size: clamp(10px, 2vw, 20px);
     flex-shrink: 0;
     margin: 0;
   }
@@ -149,7 +160,7 @@ const CheckoutButton = styled.button`
       120deg,
       transparent,
       transparent 40%,
-      rgba(26, 26, 26, 0.25),
+      rgb(207, 170, 96, 0.4),
       transparent 60%,
       transparent
     );
@@ -209,6 +220,11 @@ const ItemContainer = styled.div`
     width: 13rem;
     border-radius: 5px;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+  }
 `;
 
 const ResumeSection = styled.div`
@@ -246,6 +262,8 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
     useForBilling: true,
     note: "",
   });
+
+  const { IS_MOBILE } = useMediaQueries();
 
   // --- FETCH USER DATA ---
 
@@ -416,7 +434,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
   // RETURN
 
   return (
-    <div style={{ width: "55%", margin: "0 auto" }}>
+    <CheckoutContainer>
       <CheckoutHeader>
         <img src="close.svg" alt="" onClick={() => handleClose()} />
         <CheckoutTitle>{!orderDone ? "FINALISEZ VOTRE COMMANDE" : "MERCI POUR VOTRE COMMANDE !"}</CheckoutTitle>
@@ -439,14 +457,15 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
           </CartSummaryButton>
 
           <ResumeContainer expanded={expandedSummary}>
-            {Object.entries(configurations).map(([configKey, configuration], index) => (
-              <ItemContainer key={configKey}>
-                <img className="imagePreview" src={configuration.image} alt="Visualisation de la configuration" />
-                <ResumeSection>
-                  <Resume type="cart" configuration={configuration} itemIndex={index + 1} />
-                </ResumeSection>
-              </ItemContainer>
-            ))}
+            {configurations &&
+              Object.entries(configurations).map(([configKey, configuration], index) => (
+                <ItemContainer key={configKey}>
+                  <img className="imagePreview" src={configuration.image} alt="Visualisation de la configuration" />
+                  <ResumeSection>
+                    <Resume type="cart" configuration={configuration} itemIndex={index + 1} />
+                  </ResumeSection>
+                </ItemContainer>
+              ))}
           </ResumeContainer>
 
           {/* INFORMATIONS */}
@@ -488,7 +507,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
           </FinalResume>
         </>
       )}
-    </div>
+    </CheckoutContainer>
   );
 };
 

@@ -40,7 +40,7 @@ const InvoiceViewer = () => {
 
     const interval = setInterval(() => {
       fetchInvoice(); // Fetch every 30 seconds
-    }, 500000); // 30 secondes
+    }, 10000); // 30 secondes
 
     return () => clearInterval(interval); // Nettoyage de l'intervalle
   }, []);

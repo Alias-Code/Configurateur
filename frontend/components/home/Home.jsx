@@ -5,11 +5,13 @@ import MainContent from "./MainContent";
 // --- STYLE ---
 
 const HomeContainer = styled.div`
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   background: url("/home_bg.png") center;
   background-size: cover;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 // --- HOME ---

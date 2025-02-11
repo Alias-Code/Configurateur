@@ -14,7 +14,7 @@ const Overlay = styled.div`
   background: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 99999999999;
+  z-index: 999999999;
 `;
 
 const Modal = styled.div`
@@ -286,6 +286,7 @@ export default function SignIn({
           type: "error",
         });
       } else {
+        handleCloseSignIn();
         login(data.token);
         setTimeout(() => {
           setNotifications({

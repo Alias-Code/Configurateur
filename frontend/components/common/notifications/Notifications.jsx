@@ -9,8 +9,8 @@ const Error = styled.div`
   background-color: ${({ status }) => (status === "error" ? "#a82633" : status === "success" ? "#245e24" : "#00000")};
   font-weight: bold;
   border-radius: 10px;
-  position: absolute;
-  z-index: 99999999999999999;
+  position: fixed;
+  z-index: 9999999999999999;
   bottom: 80%;
   left: 1%;
   padding: clamp(0.3rem, 0.8vw, 0.5rem);

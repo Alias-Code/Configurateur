@@ -14,6 +14,12 @@ const ContentContainer = styled.div`
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   overflow-y: auto;
+
+  @media (max-width: 768px) {
+    border-radius: 0px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
 `;
 
 export default function Content() {

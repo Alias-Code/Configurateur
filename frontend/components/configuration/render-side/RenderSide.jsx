@@ -7,9 +7,9 @@ import { useChoicesContext } from "../../../context/ChoicesContext";
 const RenderSideContainer = styled.div`
   width: 45%;
   height: 100vh;
-  background-color: #1a1a1a;
   color: white;
   overflow-y: auto;
+  background-color: #1a1a1a;
 
   &::-webkit-scrollbar-thumb {
     background: black;
@@ -20,7 +20,7 @@ const RenderSideContainer = styled.div`
   }
 
   @media (max-width: 992px) {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     z-index: 1001;
     transition: left 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -33,15 +33,14 @@ const RenderSideContainer = styled.div`
 export default function RenderSide({ type }) {
   // --- ÉTATS ET RÉFÉRENCES ---
 
-  const { menu } = useChoicesContext();
-  const renderRef = useRef(null);
+  const { menu, renderRef } = useChoicesContext();
 
   // --- RETURN ---
 
   return (
     <RenderSideContainer menu={menu}>
       <ImagePreviewContainer renderRef={renderRef} />
-      {type !== "mobilePreview" && <Resume renderRef={renderRef} type="resume" className="renderSide" />}
+      {type !== "mobilePreview" && <Resume type="resume" className="renderSide" />}
     </RenderSideContainer>
   );
 }

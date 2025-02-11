@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
+import { useMediaQueries } from "../../config/config";
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -50,6 +51,13 @@ const NavigationContainer = styled.div`
       }
     }
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    border-radius: 0px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
 `;
 
 const NavButton = styled.button`
@@ -92,7 +100,7 @@ const NavItem = styled.div`
       left: 0;
       width: 0;
       height: 1px;
-      background-color: white;
+      background-color: #cfaa60;
       transition: width 0.5s ease;
     }
 
@@ -104,6 +112,7 @@ const NavItem = styled.div`
 
 export default function Navigation() {
   const { logout } = useAuthContext();
+  const { IS_MOBILE } = useMediaQueries();
 
   return (
     <NavigationContainer>
@@ -151,12 +160,14 @@ export default function Navigation() {
         <hr />
       </div>
       {/* RETOUR */}
-      <Link to="/configuration">
-        <NavButton type="white">
-          <img src="/arrow_left.svg" alt="Icône de retour en arrière" />
-          Retour au configurateur
-        </NavButton>
-      </Link>
+      {!IS_MOBILE && (
+        <Link to="/configuration">
+          <NavButton type="white">
+            <img src="/arrow_left.svg" alt="Icône de retour en arrière" />
+            Retour au configurateur
+          </NavButton>
+        </Link>
+      )}
     </NavigationContainer>
   );
 }

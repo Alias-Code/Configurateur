@@ -8,6 +8,10 @@ const PaymentContainer = styled.div`
   & > div {
     flex: 1;
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
 
 const PaymentOption = styled.div`

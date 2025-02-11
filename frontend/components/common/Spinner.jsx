@@ -11,6 +11,17 @@ const spin = keyframes`
   }
 `;
 
+const blurFadeIn = keyframes`
+  0% {
+    backdrop-filter: blur(0px);
+    background-color: rgba(255, 255, 255, 0);
+  }
+  100% {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+`;
+
 const SpinnerContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -20,16 +31,18 @@ const SpinnerContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  background-color: rgba(255, 255, 255, 0.7);
-  z-index: 9999999999999999999 !important;
+  background-color: rgba(255, 255, 255, 0.4);
+  z-index: 99999999;
+  transition: all 0.5s ease;
+  animation: ${blurFadeIn} 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
   .spinner {
-    border: 4px solid rgba(255, 255, 255, 3);
-    border-top: 4px solid #3498db;
+    border: 4px solid rgba(255, 255, 255, 1);
+    border-top: 4px solid #cfaa60;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: ${spin} 1s linear infinite;
+    width: 25px;
+    height: 25px;
+    animation: ${spin} 1.5s ease-in-out infinite;
   }
 `;
 

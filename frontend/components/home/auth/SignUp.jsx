@@ -14,7 +14,7 @@ const Overlay = styled.div`
   background: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 99999999999;
+  z-index: 999999999;
 `;
 
 const Modal = styled.div`
@@ -367,6 +367,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
             type: "error",
           });
         } else {
+          handleCloseSignUp();
           login(data.token);
           setTimeout(() => {
             setNotifications({
@@ -487,7 +488,9 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
                 <input type="checkbox" name="cgu" checked={formData.cgu} onChange={handleCheckboxChange} />
                 <label htmlFor="acceptCGU">
                   J'accepte les{" "}
-                  <a href="https://lumicrea.fr/content/3-nos-conditions-generales-de-ventes?id_employee=1&adtoken=a19859276d263a2b0502e6a9e082692f&uid=3070101">
+                  <a
+                    href="https://lumicrea.fr/content/3-nos-conditions-generales-de-ventes?id_employee=1&adtoken=a19859276d263a2b0502e6a9e082692f&uid=3070101"
+                    target="_blank">
                     Conditions Générales d'Utilisation
                   </a>
                 </label>

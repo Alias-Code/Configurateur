@@ -1,6 +1,6 @@
 import express from "express";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import { generateInvoice, getInvoices } from "../controllers/order/invoiceController.js";
+import { generateInvoice, getInvoices } from "../controllers/invoiceController.js";
 import { checkoutOrder } from "../controllers/order/checkoutController.js";
 import { getOrders } from "../controllers/order/getOrdersController.js";
 import { getOrderById } from "../controllers/order/getOrderByIdController.js";

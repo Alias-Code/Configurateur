@@ -21,6 +21,8 @@ import EntryAnimation from "./components/common/animation/EntryAnimation";
 import Profil from "./components/profil/Profil";
 import Spinner from "./components/common/Spinner";
 import Modal from "./components/common/modal/Modal";
+import BottomBar from "./components/utils/BottomBar";
+import { useMediaQueries } from "./config/config";
 
 // --- STYLE ---
 
@@ -28,8 +30,12 @@ const ConfigContainer = styled.div`
   display: flex;
   height: 100vh;
   width: 100vw;
-  position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
+
+  @media (max-width: 992px) {
+    height: auto;
+    min-height: 90vh;
+  }
 `;
 
 export default function AppContent() {
@@ -38,11 +44,12 @@ export default function AppContent() {
   const { entryAnimation } = useAnimationContext();
   const { notifications } = useNotificationsContext();
   const { configurations } = useCartContext();
+  const { IS_MOBILE } = useMediaQueries();
   const { isOpen } = useModalContext();
-  const addChoice = useAddChoice();
 
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [activeId, setActiveId] = useState(null);
+  const addChoice = useAddChoice();
 
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 

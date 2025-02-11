@@ -4,10 +4,13 @@ import InterrupteursBox from "./InterrupteursBox.jsx";
 import React, { useState } from "react";
 import { Grid } from "@mui/material";
 import { useNotificationsContext } from "../../../context/NotificationsContext.jsx";
+import { useChoicesContext } from "../../../context/ChoicesContext.jsx";
 
 export default function Retros() {
   const { setNotifications } = useNotificationsContext();
+  const { idToImageName } = useChoicesContext();
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
   const retros = productInformations.Retros.slice(0, 6);
 
   // --- HANDLERS ---
@@ -39,10 +42,10 @@ export default function Retros() {
             }}
             item
             xs={3.01}
-            sm={1.75}
-            md={1.5}
-            lg={1}
-            xxl={0.75}
+            sm={2}
+            md={1.75}
+            lg={1.5}
+            xxl={1.25}
             key={item.id}
             id={item.id}
             name={item.name}
@@ -56,7 +59,7 @@ export default function Retros() {
                   });
                 }
               }}
-              src={`${item.id}.png`}
+              src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`}
               alt={item.name}
             />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />

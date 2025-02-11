@@ -5,6 +5,7 @@ import { Button } from "../../utils/SharedStyle";
 import { useChoicesContext } from "../../../context/ChoicesContext";
 import { useCartContext } from "../../../context/CartContext";
 import { useModalContext } from "../../../context/ModalContext";
+import { ITEM_CATEGORYS } from "../../../config/config.js";
 
 // --- STYLE ---
 
@@ -58,7 +59,7 @@ const ModalContent = styled.div`
 
 const Modal = () => {
   const { type, data, closeModal } = useModalContext();
-  const { choices, setChoices, defaultChoice, setRenderImage, setSelectedFacade, resetConfig } = useChoicesContext();
+  const { choices, setChoices, setSelectedFacade, resetConfig } = useChoicesContext();
   const { setConfigurations, emplacementIsFull } = useCartContext();
 
   useEffect(() => {
@@ -71,7 +72,7 @@ const Modal = () => {
       const facadeIndex = data.facadeId - 1;
       const facade = updatedChoices.facades[facadeIndex];
 
-      for (let category of ["cylindres", "retros", "prises", "gravures"]) {
+      for (let category of ITEM_CATEGORYS) {
         const index = facade[category].findIndex((item) => item.id === data.id);
         if (index !== -1) {
           // SUPPRESSION SELON LA QUANTITE

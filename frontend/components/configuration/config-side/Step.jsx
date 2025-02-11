@@ -16,12 +16,7 @@ const StyledP = styled.p`
 `;
 
 const StepContainer = styled.div`
-  padding: ${({ category }) =>
-    category === "collections"
-      ? "0 0 1rem 0"
-      : category === "retros" || category === "cylindres"
-      ? "0rem 0 1.5rem 0"
-      : "3rem 0 0 0"};
+  padding: 1rem 0;
   text-align: ${({ category }) => (category === "navbar" ? "left" : "center")};
   width: 100%;
 
@@ -43,14 +38,23 @@ const ImageContainer = styled.div`
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-top: 2rem;
+  padding-top: ${({ $category }) =>
+    $category === "variateurs" ||
+    $category === "retros" ||
+    $category === "cylindres" ||
+    $category === "prises-courant-faible"
+      ? "0.5rem"
+      : "2rem"};
 
-  transform: ${({ isColor }) => (isColor ? "translateX(8%)" : "none")};
+  transform: ${({ $category }) => ($category === "couleurs" ? "translateX(8%)" : "none")};
 
   img,
   svg {
     cursor: pointer;
-    padding: 0 1rem 0 0;
+    padding-right: ${({ $category }) =>
+      $category === "variateurs" || $category === "retros" || $category === "cylindres" || $category.includes("prises")
+        ? "0px"
+        : "1rem"};
   }
 
   .animation {
@@ -62,7 +66,7 @@ const ImageContainer = styled.div`
   }
 
   @media (max-width: 768px) {
-    transform: ${({ isColor }) => (isColor ? "translateX(2%)" : "none")};
+    transform: ${({ $category }) => ($category === "couleurs" ? "translateX(2%)" : "none")};
   }
 `;
 
@@ -76,7 +80,7 @@ export default function Step({ name, description, children, noHr, category }) {
       <TitleStyle>{name}</TitleStyle>
       {!noHr && <hr />}
       <StyledP>{description}</StyledP>
-      <ImageContainer isColor={category === "couleurs"}>
+      <ImageContainer $category={category}>
         {React.Children.map(children, (child) => {
           if (!React.isValidElement(child)) return null;
 

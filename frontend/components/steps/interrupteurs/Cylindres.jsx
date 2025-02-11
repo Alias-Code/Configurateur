@@ -4,10 +4,13 @@ import InterrupteursBox from "./InterrupteursBox.jsx";
 import React, { useState } from "react";
 import { Grid } from "@mui/material";
 import { useNotificationsContext } from "../../../context/NotificationsContext.jsx";
+import { useChoicesContext } from "../../../context/ChoicesContext.jsx";
 
 export default function Cylindres() {
   const { setNotifications } = useNotificationsContext();
+  const { idToImageName } = useChoicesContext();
   const [hoveredIndex, setHoveredIndex] = useState(null);
+
   const cylindres = productInformations.Cylindres.slice(0, 6);
 
   // --- DÉTECTION MOBILE/TABLETTE ---
@@ -45,10 +48,10 @@ export default function Cylindres() {
             }}
             item
             xs={3.01}
-            sm={1.75}
-            md={1.5}
-            lg={1}
-            xxl={0.75}
+            sm={2}
+            md={1.75}
+            lg={1.5}
+            xxl={1.25}
             key={item.id}
             id={item.id}
             name={item.name}
@@ -62,7 +65,7 @@ export default function Cylindres() {
                   });
                 }
               }}
-              src={`${item.id}.png`}
+              src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`}
               alt={item.alt}
             />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />

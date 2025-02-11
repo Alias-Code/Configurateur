@@ -7,11 +7,14 @@ const SocialsContainer = styled.div`
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
-  margin-top: 3rem;
-  margin-bottom: 1rem;
+  margin: 3rem 0 1rem 0;
 
   img {
     width: 25%;
+
+    @media (max-width: 900px) {
+      width: 50%;
+    }
   }
 
   div {

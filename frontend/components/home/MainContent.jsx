@@ -23,7 +23,7 @@ const MainContentContainer = styled.div`
 `;
 
 const Description = styled.p`
-  font-size: clamp(0.6rem, 2vw, 1rem);
+  font-size: clamp(0.7rem, 2vw, 1rem);
   max-width: 600px;
   padding: 0 1rem;
   margin-top: 1rem;
@@ -59,7 +59,7 @@ const ButtonGroup = styled.div`
 `;
 
 const Logo = styled.img`
-  height: 50px;
+  height: 80px;
   margin-top: 1rem;
 `;
 
@@ -115,14 +115,14 @@ export default function MainContent() {
       {/* MAIN CONTENT */}
 
       <MainContentContainer>
-        <TitleStyle color="white" fontSize="1.5rem">
+        <TitleStyle color="white" fontSize="1rem">
           Configurez votre produit haut de gamme
         </TitleStyle>
         <Description>
           Choisissez parmi une large gamme de designs et de finitions pour adapter votre installation électrique à vos
           besoins et à votre style.
         </Description>
-        <Logo src="vendomeserie2_white.png" alt="Logo Lumicrea" />
+        <Logo src="/logo-vendome-serie-2-blanc.png" alt="Logo Lumicrea" />
         <HrContainer>
           <Line />
           <CenteredText>Commencez votre configuration</CenteredText>

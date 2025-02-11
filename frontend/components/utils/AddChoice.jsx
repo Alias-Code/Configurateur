@@ -2,7 +2,7 @@ import productInformations from "../../config/productInformations";
 import { useNotificationsContext } from "../../context/NotificationsContext";
 import { useChoicesContext } from "../../context/ChoicesContext";
 import { useCartContext } from "../../context/CartContext";
-import { MAX_GRAVURE_PER_PLAQUE } from "../../config/config";
+import { MAX_GRAVURE_PER_PLAQUE, ITEM_CATEGORYS } from "../../config/config";
 
 export function useAddChoice() {
   const { choices, setChoices, selectedFacade, setSelectedFacade, getSelectedFacadeForIndex, setRenderImage } =
@@ -19,6 +19,7 @@ export function useAddChoice() {
 
   const calculateTotalGravures = () => {
     return choices.facades.reduce((sum, facade) => {
+      if (!facade.gravures) return sum;
       const facadeGravures = facade.gravures.reduce((gravureSum, item) => gravureSum + item.quantity, 0);
       return sum + facadeGravures;
     }, 0);
@@ -28,7 +29,9 @@ export function useAddChoice() {
     if (id.startsWith("R-")) return "Retros";
     if (id.startsWith("CL-")) return "Couleurs";
     if (id.startsWith("C-")) return "Cylindres";
+    if (id.startsWith("VA-")) return "Variateurs";
     if (id.startsWith("P-")) return "Prises";
+    if (id.startsWith("LI-")) return "Liseuses";
     if (id.startsWith("G-")) return "Gravures";
     if (
       id.startsWith("N-") ||
@@ -117,7 +120,7 @@ export function useAddChoice() {
       if (plaqueExiste) {
         setRenderImage(`plaques/${colorItem.id}_${choices.facade.id}.jpg`);
       } else {
-        setRenderImage(`plaques/${colorItem.id}.png`);
+        setRenderImage(`plaques/${colorItem.id}.jpg`);
       }
       return;
     }
@@ -142,22 +145,23 @@ export function useAddChoice() {
 
         const updatedFacades = [...choices.facades];
 
+        const createEmptyFacade = (facadeId) => {
+          const facade = { id: facadeId };
+          ITEM_CATEGORYS.forEach((category) => {
+            facade[category] = [];
+          });
+          return facade;
+        };
+
+        // SUPPRESSION DES MECANISMES LORSQU'ON PASSE A UNE FACADE PLUS BASSE
+
         if (facadeNumber === 3 && newFacadeItem.id.includes("2")) {
-          updatedFacades[2] = {
-            id: 3,
-            cylindres: [],
-            retros: [],
-            prises: [],
-            gravures: [],
-          };
+          updatedFacades[2] = createEmptyFacade(3);
         } else if (facadeNumber === 2 && newFacadeItem.id.includes("1")) {
-          updatedFacades[1] = {
-            id: 2,
-            cylindres: [],
-            retros: [],
-            prises: [],
-            gravures: [],
-          };
+          updatedFacades[1] = createEmptyFacade(2);
+        } else if (facadeNumber === 3 && newFacadeItem.id.includes("1")) {
+          updatedFacades[2] = createEmptyFacade(3);
+          updatedFacades[1] = createEmptyFacade(2);
         }
 
         setChoices({
@@ -165,6 +169,8 @@ export function useAddChoice() {
           facade: newFacadeItem,
           facades: updatedFacades,
         });
+
+        // REMPLACEMENT DE L'IMAGE ET SWITCH SUR LA PLAQUE VIDE
 
         const colorName = choices.couleur.id;
         const facadeName = facadeItem.id;
@@ -186,10 +192,27 @@ export function useAddChoice() {
     const currentFacade = choices.facades[currentFacadeIndex];
     const existingItem = currentFacade[categoryKey].find((item) => item.id === identifier);
     const isGravure = category === "Gravures";
-
-    const hasCourantPrise = currentFacade.prises.some((p) => p.id.includes("P-C"));
-    const isCourantPrise = identifier.includes("P-C");
     const totalItems = calculateTotalItems(currentFacade);
+
+    // STOCKAGE DE TOUT LES MECANISMES QUI PRENNENT UNE PLACE
+
+    const hasOneEmplacementItem =
+      currentFacade.prises.some((p) => p.id.includes("P-C")) ||
+      currentFacade.variateurs.some((v) => v.id.includes("VA-")) ||
+      currentFacade.liseuses.some((l) => l.id.includes("LI-"));
+    const isOneEmplacement = identifier.includes("P-C") || identifier.includes("VA-") || identifier.includes("LI-");
+
+    // --- VERIFICATION LISEUSES ---
+
+    if (category === "Liseuses" && selectedFacade !== 1) {
+      setNotifications({
+        content: "Vous ne pouvez mettre de liseuse qu'au premier emplacement.",
+        type: "error",
+      });
+      return;
+    }
+
+    // --- VERIFICATIONS GRAVURES ---
 
     const totalGravures = calculateTotalGravures(currentFacade);
 
@@ -199,6 +222,11 @@ export function useAddChoice() {
         type: "error",
       });
       return;
+    } else if (isGravure && totalGravures < facadeNumber * MAX_GRAVURE_PER_PLAQUE) {
+      setNotifications({
+        content: "Vous avez bien ajouté une gravure.",
+        type: "success",
+      });
     }
 
     if (!isGravure) {
@@ -214,7 +242,7 @@ export function useAddChoice() {
         }
       }
 
-      if ((hasCourantPrise && totalItems >= 1) || (!hasCourantPrise && totalItems >= 2)) {
+      if ((hasOneEmplacementItem && totalItems >= 1) || (!hasOneEmplacementItem && totalItems >= 2)) {
         setNotifications({
           content: `Vous avez atteint la quantité maximum de mécanisme sur l'emplacement N°${selectedFacade}.`,
           type: "error",
@@ -222,9 +250,9 @@ export function useAddChoice() {
         return;
       }
 
-      if ((isCourantPrise && totalItems >= 1) || (!isCourantPrise && hasCourantPrise)) {
+      if ((isOneEmplacement && totalItems >= 1) || (!isOneEmplacement && hasOneEmplacementItem)) {
         setNotifications({
-          content: "Attention, une prise de courant prend un emplacement complet.",
+          content: "Attention, vous avez déjà un emplacement complet de remplis",
           type: "error",
         });
         return;
@@ -239,7 +267,7 @@ export function useAddChoice() {
 
       if (
         (category === "Prises" && hasInterrupteurs) ||
-        ((category === "Gravures" || category === "Retros") && hasPrise)
+        ((category === "Cylindres" || category === "Retros") && hasPrise)
       ) {
         setNotifications({
           content:

@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
 import { useChoicesContext } from "./ChoicesContext";
+import { ITEM_CATEGORYS } from "../config/config";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  // --- ÉTATS ET RÉFÉRENCES ---
   const [configurations, setConfigurations] = useState(JSON.parse(localStorage.getItem("configurations")) || {});
   const { choices, setChoices, getSelectedFacadeForIndex } = useChoicesContext();
   const [showCart, setShowCart] = useState(false);
@@ -19,12 +19,12 @@ export function CartProvider({ children }) {
     updatedConfigurations[configKey].quantity = newQuantity;
     localStorage.setItem("configurations", JSON.stringify(updatedConfigurations));
     setConfigurations(updatedConfigurations);
-    setChoices(updatedConfigurations[configKey]); // Met à jour les choix
+    setChoices(updatedConfigurations[configKey]);
   }
 
   function addToCart(config) {
     const updatedConfigurations = { ...configurations };
-    const lastItemKey = Object.keys(updatedConfigurations).pop();
+    const lastItemKey = Object.keys(updatedConfigurations).pop() || "config0";
     const lastItemNumber = parseInt(lastItemKey.replace("config", ""), 10);
     const nextItemNumber = lastItemNumber + 1;
     updatedConfigurations[`config${nextItemNumber}`] = config;
@@ -39,44 +39,45 @@ export function CartProvider({ children }) {
     setConfigurations(updatedConfigurations);
   }
 
-  const emplacementIsFull = (facade) => {
-    const hasCourantPrise = facade.prises.some((p) => p.id.includes("P-C"));
-
-    if (
-      (hasCourantPrise && calculateTotalItems(facade) >= 1) ||
-      (!hasCourantPrise && calculateTotalItems(facade) >= 2)
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   const calculateTotalItems = (facade) => {
+    if (!facade) return 0;
     return (
-      facade.cylindres.reduce((sum, item) => sum + item.quantity, 0) +
-      facade.retros.reduce((sum, item) => sum + item.quantity, 0) +
-      facade.prises.reduce((sum, item) => sum + item.quantity, 0)
+      (facade?.cylindres?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0) +
+      (facade?.retros?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0) +
+      (facade?.variateurs?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0) +
+      (facade?.prises?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0) +
+      (facade?.liseuses?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0)
     );
   };
 
+  const emplacementIsFull = (facade) => {
+    if (!facade) return false;
+
+    const hasOneEmplacement =
+      facade?.prises?.some((p) => p.id?.includes("P-C")) ||
+      facade?.variateurs?.some((v) => v.id?.includes("VA-")) ||
+      facade?.liseuses?.some((l) => l.id?.includes("LI-"));
+
+    const total = calculateTotalItems(facade);
+    return hasOneEmplacement ? total >= 1 : total >= 2;
+  };
+
   const calculateAllTotalItems = () => {
+    if (!choices?.facades) return 0;
     let totalQuantity = 0;
 
     choices.facades.forEach((facade) => {
-      totalQuantity += facade.cylindres.reduce((sum, item) => sum + item.quantity, 0);
-      totalQuantity += facade.retros.reduce((sum, item) => sum + item.quantity, 0);
-      totalQuantity += facade.prises.reduce((sum, item) => sum + item.quantity, 0);
+      totalQuantity += calculateTotalItems(facade);
     });
 
     return totalQuantity;
   };
 
-  // CALCULATE PRICE
-
   const calculateItemTotal = (items) => {
+    if (!items) return 0;
+
     return items.reduce((total, item) => {
-      return total + item.price * (item.quantity || 1);
+      return total + (item.price || 0) * (item.quantity || 1);
     }, 0);
   };
 
@@ -85,24 +86,25 @@ export function CartProvider({ children }) {
 
     let total = config.facade?.price || 0;
 
-    const categories = ["cylindres", "retros", "prises", "gravures"];
+    const categories = ITEM_CATEGORYS;
+
     categories.forEach((category) => {
-      config.facades.forEach((facade) => {
-        if (facade[category]) {
+      config.facades?.forEach((facade) => {
+        if (facade?.[category]) {
           total += calculateItemTotal(facade[category]);
         }
       });
     });
 
-    return total * config.quantity;
+    return total * (config.quantity || 1);
   };
 
   const updateItemQuantity = (itemId, category, newQuantity) => {
     const updatedChoices = { ...choices };
     const facadeIndex = getSelectedFacadeForIndex();
-    const facade = updatedChoices.facades[facadeIndex];
+    const facade = updatedChoices.facades?.[facadeIndex];
 
-    if (facade[category]) {
+    if (facade?.[category]) {
       const itemIndex = facade[category].findIndex((item) => item.id === itemId);
       if (itemIndex !== -1) {
         facade[category][itemIndex].quantity = newQuantity;
@@ -112,16 +114,13 @@ export function CartProvider({ children }) {
   };
 
   const getAllItems = (config, category) => {
-    // Si c'est une configuration finale ou vide, retourner un tableau vide
     if (!config || config.type === "final_cart") {
       return [];
     }
 
-    // Si c'est une configuration avec des façades
     if (config.facades) {
       return config.facades.reduce((acc, facade) => {
-        // Pour chaque item dans la catégorie, ajouter l'ID de la façade
-        const itemsWithFacadeId = (facade[category] || []).map((item) => ({
+        const itemsWithFacadeId = (facade?.[category] || []).map((item) => ({
           ...item,
           facadeId: facade.id,
         }));
@@ -131,8 +130,6 @@ export function CartProvider({ children }) {
 
     return [];
   };
-
-  //   --- RENDU ---
 
   return (
     <CartContext.Provider

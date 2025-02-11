@@ -9,6 +9,10 @@ const DeliveryContainer = styled.div`
   & > div {
     width: 100%;
   }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
 `;
 
 const DeliveryOption = styled.div`
@@ -16,12 +20,12 @@ const DeliveryOption = styled.div`
   font-size: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
-  cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 1rem;
   color: white;
+  cursor: pointer;
 
   a {
     text-decoration: underline;
@@ -32,10 +36,8 @@ const DeliveryOption = styled.div`
     height: 2.5rem;
   }
 
-  div {
-    h3 {
-      font-size: 13px;
-    }
+  div h3 {
+    font-size: 13px;
   }
 
   .checkbox {
@@ -110,7 +112,9 @@ export default function Shipping({ selectedDelivery, setSelectedDelivery, handle
         </DeliveryOption>
       </DeliveryContainer>
 
-      {selectedDelivery === "Point Relai - Mondial Relay" && <MondialRelayPicker onPointRelaisSelect={handleRelayPointSelect} />}
+      {selectedDelivery === "Point Relai - Mondial Relay" && (
+        <MondialRelayPicker onPointRelaisSelect={handleRelayPointSelect} />
+      )}
     </>
   );
 }

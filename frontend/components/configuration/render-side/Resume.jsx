@@ -104,7 +104,7 @@ const DetailsSection = ({ title, items, type }) => {
 
 // --- MAIN COMPONENT ---
 
-export default function Resume({ renderRef, type, configuration, itemIndex }) {
+export default function Resume({ type, configuration, itemIndex }) {
   const { calculateConfigTotal, getAllItems } = useCartContext();
   const { isOpen } = useModalContext();
   const { choices } = useChoicesContext();
@@ -162,17 +162,22 @@ export default function Resume({ renderRef, type, configuration, itemIndex }) {
         <DetailsSection
           title="Interrupteur(s)"
           type={type}
-          items={[...getAllItems(currentConfig, "cylindres"), ...getAllItems(currentConfig, "retros")]}
+          items={[
+            ...getAllItems(currentConfig, "cylindres"),
+            ...getAllItems(currentConfig, "retros"),
+            ...getAllItems(currentConfig, "variateurs"),
+          ]}
         />
 
         <DetailsSection title="Prise(s)" type={type} items={getAllItems(currentConfig, "prises")} />
+
+        <DetailsSection title="Liseuse(s)" type={type} items={getAllItems(currentConfig, "liseuses")} />
 
         <DetailsSection title="Gravure(s)" type={type} items={getAllItems(currentConfig, "gravures")} />
 
         <hr />
 
         <ResumeSummary
-          renderRef={renderRef || ""}
           itemIndex={itemIndex || ""}
           priceHT={totalPrice / 1.2}
           quantity={currentConfig.quantity}

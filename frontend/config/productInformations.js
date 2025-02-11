@@ -3,7 +3,7 @@ const productInformations = {
     {
       id: "Vendome",
       name: "Vendome",
-      src: "/vendomeserie2.png",
+      src: "/Vendome.png",
     },
   ],
 
@@ -27,14 +27,14 @@ const productInformations = {
   ],
 
   Prises: [
-    { id: "P-RJ45", name: "Prise RJ45", price: 30 },
-    { id: "P-USBA", name: "Prise USB-A", price: 30 },
-    { id: "P-USBC", name: "Prise USB-C", price: 30 },
-    { id: "P-USBAC", name: "Prise USB A+C", price: 30 },
-    { id: "P-HDMI", name: "Prise HDMI", price: 30 },
-    { id: "P-TV", name: "Prise TV", price: 30 },
     { id: "P-CB", name: "Prise Courant Blanc", price: 20 },
     { id: "P-CN", name: "Prise Courant Noir", price: 20 },
+    { id: "P-HDMI", name: "Prise HDMI", price: 30 },
+    { id: "P-RJ45", name: "Prise RJ45", price: 30 },
+    { id: "P-USBC", name: "Prise USB-C", price: 30 },
+    { id: "P-USBAC", name: "Prise USB A+C", price: 30 },
+    { id: "P-HP", name: "Prise Haut-Parleur", price: 30 },
+    { id: "P-TV", name: "Prise TV", price: 30 },
   ],
 
   Retros: [
@@ -83,6 +83,24 @@ const productInformations = {
     { id: "C-BZ-P", name: "Cylindre Bronze Poussoir", price: 40, type: "P" },
     { id: "C-LT-P", name: "Cylindre Laiton Poussoir", price: 50, type: "P" },
     { id: "C-CU-P", name: "Cylindre Cuivre Poussoir", price: 40, type: "P" },
+  ],
+
+  Variateurs: [
+    { id: "VA-N", name: "Variateur Noir", price: 20 },
+    { id: "VA-CF", name: "Variateur Canon de Fusil", price: 20 },
+    { id: "VA-AC", name: "Variateur Acier", price: 20 },
+    { id: "VA-BZ", name: "Variateur Bronze", price: 20 },
+    { id: "VA-LT", name: "Variateur Laiton", price: 30 },
+    { id: "VA-CU", name: "Variateur Cuivre", price: 20 },
+  ],
+
+  Liseuses: [
+    { id: "LI-N", name: "Liseuse Noir", price: 20 },
+    { id: "LI-CF", name: "Liseuse Canon de Fusil", price: 20 },
+    { id: "LI-AC", name: "Liseuse Acier", price: 20 },
+    { id: "LI-BZ", name: "Liseuse Bronze", price: 20 },
+    { id: "LI-LT", name: "Liseuse Laiton", price: 30 },
+    { id: "LI-BM", name: "Liseuse Blanc", price: 20 },
   ],
 };
 
