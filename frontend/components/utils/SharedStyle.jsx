@@ -5,8 +5,8 @@ import styled from "@emotion/styled";
 export const MecanismeBoxStyle = styled.div`
   opacity: ${({ visible }) => (visible ? "1" : "0")};
   position: absolute;
-  top: 90%;
-  left: -20%;
+  top: 85%;
+  left: -10%;
   border-radius: 4px;
   background: white;
   border: 1px solid black;
@@ -120,7 +120,7 @@ export const Button = styled.button`
 // --- TITRE ---
 
 export const TitleStyle = styled.h2`
-  font-weight: 100;
+  font-weight: ${(props) => props.fontWeight || 100};
   letter-spacing: 7px;
   font-size: ${(props) => props.fontSize || "1rem"} !important;
   text-transform: uppercase;

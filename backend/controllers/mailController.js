@@ -156,11 +156,17 @@ function generateEmailHTML(cart, orderData, userInformations, configImageSaver) 
                                 .map((category) => {
                                   let items = [];
                                   if (category === "interrupteurs") {
-                                    items = config.facades.flatMap((facade) => [...facade.cylindres, ...facade.retros]);
+                                    items = config.facades.flatMap((facade) => [
+                                      ...facade.cylindres,
+                                      ...facade.retros,
+                                      ...facade.variateurs,
+                                    ]);
                                   } else if (category === "prises") {
                                     items = config.facades.flatMap((facade) => facade.prises);
                                   } else if (category === "gravures") {
                                     items = config.facades.flatMap((facade) => facade.gravures);
+                                  } else if (category === "liseuses") {
+                                    items = config.facades.flatMap((facade) => facade.liseuses);
                                   }
 
                                   return items.length > 0

@@ -8,7 +8,7 @@ import { ThemeProvider, createTheme } from "@mui/material";
 export const lightTheme = {
   textColor: "black",
   backgroundColor: "white",
-  borderColor: "#939393",
+  borderColor: "#b7b7b7",
   labelColor: "black",
   displayAddressBoxColor: "#f8f9fa",
   displayAddressTextColor: "#333",

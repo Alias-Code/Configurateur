@@ -33,7 +33,6 @@ const Card = styled(Link)`
   background-color: #fff;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,7 +44,7 @@ const Card = styled(Link)`
   cursor: pointer;
 
   &:hover {
-    transform: translateY(-10px) scale(1.1);
+    color: #cfaa60 !important;
   }
 `;
 
@@ -60,7 +59,7 @@ const Icon = styled.img`
 `;
 
 const CardTitle = styled.h3`
-  font-size: 1rem;
+  font-size: 0.8rem;
   margin-bottom: 0.5rem;
 `;
 

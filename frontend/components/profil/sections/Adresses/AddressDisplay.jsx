@@ -120,7 +120,7 @@ export default function AddressDisplay({ isCheckout, address, onAddressDeleted, 
     <ThemeProvider theme={isCheckout ? darkTheme : lightTheme}>
       <div>
         {!isCheckout && <hr />}
-        <TitleStyle className="subtitle" fontSize="0.9rem" color={isCheckout ? "white" : "black"}>
+        <TitleStyle fontSize="0.9rem" color={isCheckout ? "white" : "black"}>
           Adresse de {type.split("-")[1] === "billing" ? "facturation" : "livraison"} :
         </TitleStyle>
         <InfoSection>

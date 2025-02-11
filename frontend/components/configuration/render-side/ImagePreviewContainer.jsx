@@ -133,8 +133,8 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           1: { positionY: "49.25%", positionX: "50%" },
         },
         deuxemplacements: {
-          1: { positionY: "49.25%", positionX: "44.5%" },
-          2: { positionY: "48.75%", positionX: "54.5%" },
+          1: { positionY: "49.25%", positionX: "45%" },
+          2: { positionY: "48.75%", positionX: "54%" },
         },
       },
     },
@@ -146,22 +146,22 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           2: { positionY: "48.5%", positionX: "63%" },
         },
         deuxemplacements: {
-          1: { positionY: "50%", positionX: "31%" },
-          2: { positionY: "49.4%", positionX: "41%" },
-          3: { positionY: "49%", positionX: "57%" },
-          4: { positionY: "48.5%", positionX: "67%" },
+          1: { positionY: "50%", positionX: "31.5%" },
+          2: { positionY: "49.4%", positionX: "40.5%" },
+          3: { positionY: "49%", positionX: "57.5%" },
+          4: { positionY: "48.5%", positionX: "66.5%" },
         },
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "37%", positionX: "48.5%" },
-          2: { positionY: "63%", positionX: "51.5%" },
+          1: { positionY: "38%", positionX: "48.5%" },
+          2: { positionY: "62%", positionX: "51.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "37%", positionX: "44%" },
-          2: { positionY: "36.5%", positionX: "54%" },
-          3: { positionY: "63%", positionX: "47%" },
-          4: { positionY: "62.3%", positionX: "57%" },
+          1: { positionY: "37%", positionX: "44.5%" },
+          2: { positionY: "36.5%", positionX: "53.5%" },
+          3: { positionY: "63%", positionX: "47.5%" },
+          4: { positionY: "62.3%", positionX: "56.5%" },
         },
       },
     },
@@ -169,36 +169,35 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     triple: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "51%", positionX: "25.5%" },
+          1: { positionY: "51%", positionX: "26%" },
           2: { positionY: "49.5%", positionX: "50%" },
-          3: { positionY: "48%", positionX: "74%" },
+          3: { positionY: "48%", positionX: "73.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "51%", positionX: "21%" },
-          2: { positionY: "50.5%", positionX: "31%" },
-          3: { positionY: "49.5%", positionX: "44%" },
-          4: { positionY: "49%", positionX: "54%" },
-          5: { positionY: "48%", positionX: "68%" },
-          6: { positionY: "47.5%", positionX: "78%" },
+          1: { positionY: "51%", positionX: "21.5%" },
+          2: { positionY: "50.5%", positionX: "30.5%" },
+          3: { positionY: "49.5%", positionX: "44.5%" },
+          4: { positionY: "49%", positionX: "53.5%" },
+          5: { positionY: "48%", positionX: "68.5%" },
+          6: { positionY: "47.5%", positionX: "77.5%" },
         },
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "23%", positionX: "47%" },
-          2: { positionY: "49.5%", positionX: "50.5%" },
-          3: { positionY: "76%", positionX: "54%" },
+          1: { positionY: "26%", positionX: "47%" },
+          2: { positionY: "50%", positionX: "50.5%" },
+          3: { positionY: "73%", positionX: "54%" },
         },
         deuxemplacements: {
-          1: { positionY: "22%", positionX: "42%" },
-          2: { positionY: "21.5%", positionX: "52%" },
-          3: { positionY: "48.5%", positionX: "45.5%" },
-          4: { positionY: "48%", positionX: "55.5%" },
-          5: { positionY: "75.5%", positionX: "49%" },
-          6: { positionY: "75%", positionX: "59%" },
+          1: { positionY: "25%", positionX: "42.5%" },
+          2: { positionY: "24.5%", positionX: "51.5%" },
+          3: { positionY: "48.5%", positionX: "46%" },
+          4: { positionY: "48%", positionX: "55%" },
+          5: { positionY: "72%", positionX: "49.5%" },
+          6: { positionY: "71.5%", positionX: "58.5%" },
         },
       },
     },
-    images: [],
   });
 
   // --- HANDLERS ---
@@ -350,6 +349,10 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                     size = 18;
                     break;
 
+                  case !mecanisme.name.includes("Courant") && mecanisme.name.includes("Prise"):
+                    size = 19;
+                    break;
+
                   case mecanisme.name.includes("TV"):
                     size = 19;
                     break;
@@ -409,9 +412,9 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                     if (allMecanismes.length === 1 && mecanisme.quantity === 1) {
                       adjustedXPosition += 1;
                     } else if (currentPositionIndex === 1) {
-                      adjustedXPosition += facadeOrientation === "verticale" ? 2 : 2.5;
+                      adjustedXPosition += facadeOrientation === "verticale" ? 1 : 2.25;
                     } else {
-                      adjustedXPosition -= facadeOrientation === "verticale" ? 1.5 : 0.5;
+                      adjustedXPosition -= facadeOrientation === "verticale" ? 0.25 : -0.75;
                     }
                   }
 

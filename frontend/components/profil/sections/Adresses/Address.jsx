@@ -23,9 +23,9 @@ const AdressesContainer = styled.div`
   }
 
   hr {
-    border: 1px solid #eee;
+    border: 0.5px solid black;
     margin: 1rem 0;
-    width: 100%;
+    width: 60%;
   }
 
   .subtitle {
@@ -140,7 +140,7 @@ function Adresses({ isCheckout, checkoutFormData, setCheckoutFormData }) {
       <AdressesContainer>
         {!isCheckout ? (
           <HeaderContainer>
-            <TitleStyle>Consultez vos adresses</TitleStyle>
+            <TitleStyle fontWeight="700">Consultez vos adresses</TitleStyle>
             {isSynchronized && (
               <SharedAddressMessage>
                 Vous utilisez une adresse identique pour la livraison et la facturation.

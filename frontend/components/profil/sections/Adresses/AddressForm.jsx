@@ -8,9 +8,10 @@ import { useTheme } from "@emotion/react";
 const FormGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
+  gap: 5rem;
   margin-bottom: 1rem;
-  width: 70%;
+  margin-top: 1rem;
+  width: 60%;
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -36,7 +37,7 @@ const EntryArea = styled.div`
 const Input = styled.input`
   width: 100%;
   border: none;
-  border-bottom: 1px solid ${({ theme }) => theme.borderColor};
+  border-bottom: 0.5px solid ${({ theme }) => theme.borderColor};
   font-size: 1rem;
   font-weight: normal;
   outline: none;
@@ -280,7 +281,7 @@ export default function AddressForm({
 
   return (
     <div>
-      <TitleStyle className="subtitle" fontSize="0.9rem" color={theme.textColor}>
+      <TitleStyle fontSize="0.9rem" color={theme.textColor} fontWeight="700">
         Adresse de {type.split("-")[1] === "billing" ? "facturation" : "livraison"} :
       </TitleStyle>
 
