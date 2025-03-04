@@ -35,7 +35,7 @@ const Instruction = styled.img`
   padding: 0px !important;
   z-index: 9999999999;
   user-select: none;
-  filter: invert(1);
+  
 
   @media (max-width: 767px) {
     top: 90%;

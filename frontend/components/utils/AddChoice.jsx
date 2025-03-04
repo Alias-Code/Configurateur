@@ -44,33 +44,78 @@ export function useAddChoice() {
     return null;
   };
 
+  // const switchOnEmptyEmplacement = (newFacadeNumber, identifier) => {
+  //   const facadeNumber = parseInt(choices.facade.id.slice("-1"));
+  //   const isPlaque = getCategory(identifier) === "Facades";
+
+  // // SI ON REVIENT EN ARRIERE DANS UN EMPLACEMENT DE PLAQUE
+
+  // if (isPlaque && newFacadeNumber < facadeNumber && emplacementIsFull(choices.facades[newFacadeNumber - 1])) {
+  //   setSelectedFacade(newFacadeNumber);
+  //   return;
+  // }
+
+  //   // SI ON AVANCE
+
+  //   for (const facade of choices.facades) {
+  //     if (!emplacementIsFull(facade)) {
+  //       if (!isPlaque && facade.id <= facadeNumber) {
+  //         // AVANCEMENT VIA UN AJOUT DE MECANISME : ON CHECK LA FACADE NUMBER ACTUELLE
+
+  //         setSelectedFacade(facade.id);
+  //       } else if (isPlaque && facade.id <= newFacadeNumber) {
+  //         // AVANCEMENT VIA UNE AUGMENTATION DE FACADE, ON CHECK LA NOUVELLE FACADE NUMBER
+
+  //         setSelectedFacade(facade.id);
+  //       }
+  //       break;
+  //     }
+  //   }
+  // };
+
   const switchOnEmptyEmplacement = (newFacadeNumber, identifier) => {
     const facadeNumber = parseInt(choices.facade.id.slice("-1"));
     const isPlaque = getCategory(identifier) === "Facades";
 
-    // SI ON REVIENT EN ARRIERE DANS UN EMPLACEMENT DE PLAQUE
+    // SI ON CHOISIS UNE PLAQUE INFERIEURE A LA NOTRE, LA FLECHE REVIENT EN ARRIERE
 
     if (isPlaque && newFacadeNumber < facadeNumber && emplacementIsFull(choices.facades[newFacadeNumber - 1])) {
       setSelectedFacade(newFacadeNumber);
       return;
     }
 
-    // SI ON AVANCE
+    if (emplacementIsFull(choices.facades[selectedFacade - 1])) {
+      // SI ON REMPLIE L'EMPLACEMENT ACTUEL : ON PASSE AUTOMATIQUEMENT AU PROCHAIN SI IL N'EST PAS PLEIN
 
-    for (const facade of choices.facades) {
-      if (!emplacementIsFull(facade)) {
-        if (!isPlaque && facade.id <= facadeNumber) {
-          // AVANCEMENT VIA UN AJOUT DE MECANISME : ON CHECK LA FACADE NUMBER ACTUELLE
+      if (selectedFacade + 1 <= facadeNumber && !emplacementIsFull(choices.facades[selectedFacade])) {
+        setSelectedFacade(selectedFacade + 1);
+        return;
+      }
 
+      // SI LE PROCHAIN N'EST PAS POSSIBLE ALORS ON REPASSE AU PREMIER DISPONIBLE DEPUIS LA GAUCHE / LE HAUT
+
+      for (const facade of choices.facades) {
+        if (!emplacementIsFull(facade) && facade.id <= facadeNumber) {
           setSelectedFacade(facade.id);
-        } else if (isPlaque && facade.id <= newFacadeNumber) {
-          // AVANCEMENT VIA UNE AUGMENTATION DE FACADE, ON CHECK LA NOUVELLE FACADE NUMBER
-
-          setSelectedFacade(facade.id);
+          break;
         }
-        break;
       }
     }
+
+    // SI ON REMPLIE L'EMPLACEMENT ACTUEL : ON PASSE AUTOMATIQUEMENT AU PROCHAIN
+
+    // if (!isPlaque) {
+    //   for (const facade of choices.facades) {
+    //     if (emplacementIsFull(facade)) {
+    //       // AVANCEMENT VIA UN AJOUT DE MECANISME : ON CHECK LA FACADE NUMBER ACTUELLE
+
+    //       let newSelectedFacade = selectedFacade + 1;
+
+    //       setSelectedFacade(newSelectedFacade < 3 && newSelectedFacade);
+    //     }
+    //     break;
+    //   }
+    // }
   };
 
   // --- ADD CHOICE ---
@@ -198,9 +243,8 @@ export function useAddChoice() {
 
     const hasOneEmplacementItem =
       currentFacade.prises.some((p) => p.id.includes("P-C")) ||
-      currentFacade.variateurs.some((v) => v.id.includes("VA-")) ||
-      currentFacade.liseuses.some((l) => l.id.includes("LI-"));
-    const isOneEmplacement = identifier.includes("P-C") || identifier.includes("VA-") || identifier.includes("LI-");
+      currentFacade.variateurs.some((v) => v.id.includes("VA-"));
+    const isOneEmplacement = identifier.includes("P-C") || identifier.includes("VA-");
 
     // --- VERIFICATION LISEUSES ---
 
@@ -217,7 +261,7 @@ export function useAddChoice() {
         return;
       }
 
-      if (choices.facade.id.includes("V-") && selectedFacade !== 1) {
+      if ((choices.facade.id.includes("V-") && selectedFacade !== 1) || currentFacade.prises.length >= 1) {
         setNotifications({
           content: "Vous ne pouvez pas placer de liseuse à cet endroit.",
           type: "error",
@@ -266,7 +310,7 @@ export function useAddChoice() {
 
       if ((isOneEmplacement && totalItems >= 1) || (!isOneEmplacement && hasOneEmplacementItem)) {
         setNotifications({
-          content: "Attention, vous avez déjà un emplacement complet de remplis",
+          content: "Attention, un variateur et une prise prennent un emplacement complet.",
           type: "error",
         });
         return;
@@ -274,6 +318,7 @@ export function useAddChoice() {
 
       // --- BLOCAGE COMBINAISON IMPOSSIBLE ---
 
+      const hasLiseuse = currentFacade.liseuses.some((l) => l.id.includes("LI-"));
       const hasPrise = currentFacade.prises.some((p) => p.id.includes("P-"));
       const hasInterrupteurs =
         currentFacade.cylindres.some((c) => c.id.includes("C-")) ||
@@ -281,7 +326,8 @@ export function useAddChoice() {
 
       if (
         (category === "Prises" && hasInterrupteurs) ||
-        ((category === "Cylindres" || category === "Retros") && hasPrise)
+        ((category === "Cylindres" || category === "Retros") && hasPrise) ||
+        (category === "Prises" && hasLiseuse)
       ) {
         setNotifications({
           content:
@@ -308,9 +354,10 @@ export function useAddChoice() {
           currentFacadeItems[existingItemIndex] = {
             ...currentFacadeItems[existingItemIndex],
             quantity: currentFacadeItems[existingItemIndex].quantity + 1,
+            time: Math.floor(Date.now() / 1000),
           };
         } else {
-          currentFacadeItems.push({ ...item, quantity: 1 });
+          currentFacadeItems.push({ ...item, quantity: 1, time: Math.floor(Date.now() / 1000) });
         }
 
         newFacades[currentFacadeIndex] = {

@@ -7,7 +7,7 @@ import MainContent from "./MainContent";
 const HomeContainer = styled.div`
   height: 100vh;
   width: 100vw;
-  background: url("/home_bg.png") center;
+  background: url("/accueil.webp") center;
   background-size: cover;
   display: flex;
   flex-direction: column;

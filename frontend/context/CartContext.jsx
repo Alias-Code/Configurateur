@@ -54,9 +54,7 @@ export function CartProvider({ children }) {
     if (!facade) return false;
 
     const hasOneEmplacement =
-      facade?.prises?.some((p) => p.id?.includes("P-C")) ||
-      facade?.variateurs?.some((v) => v.id?.includes("VA-")) ||
-      facade?.liseuses?.some((l) => l.id?.includes("LI-"));
+      facade?.prises?.some((p) => p.id?.includes("P-C")) || facade?.variateurs?.some((v) => v.id?.includes("VA-"));
 
     const total = calculateTotalItems(facade);
     return hasOneEmplacement ? total >= 1 : total >= 2;

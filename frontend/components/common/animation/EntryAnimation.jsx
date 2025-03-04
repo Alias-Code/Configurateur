@@ -53,29 +53,27 @@ export default function EntryAnimation() {
 
   useEffect(() => {
     if (entryAnimation) {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+
       // --- PENDANT LA VIDÉO ---
 
       const timer = setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.play();
+        const [type, url] = entryAnimation.split("_");
+
+        if (type === "login") {
+          setIsAuthenticated(true);
+        } else if (type === "logout") {
+          setIsAuthenticated(false);
+        } else if (type === "skip" && url === "/configuration") {
+          setSkipHome(true);
+        } else if (type === "skip" && url === "/accueil") {
+          setSkipHome(false);
         }
 
-        setTimeout(() => {
-          const [type, url] = entryAnimation.split("_");
-
-          if (type === "login") {
-            setIsAuthenticated(true);
-          } else if (type === "logout") {
-            setIsAuthenticated(false);
-          } else if (type === "skip" && url === "/configuration") {
-            setSkipHome(true);
-          } else if (type === "skip" && url === "/accueil") {
-            setSkipHome(false);
-          }
-        }, 2000);
-
         navigate(url);
-      }, 600);
+      }, 2000);
 
       // --- APRES LA VIDÉO ---
 

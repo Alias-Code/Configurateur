@@ -87,9 +87,8 @@ const WidgetContainer = styled.div`
     }
 
     .MR-Widget input[type="text"] {
-      background-color: black !important;
       border: 1px solid white !important;
-      color: white !important;
+      color: black !important;
       border-radius: 6px !important;
       padding: 8px 12px !important;
     }
@@ -111,6 +110,14 @@ const WidgetContainer = styled.div`
     .MR-Widget .MR-List .MR-ListPoint .address {
       color: #888 !important;
     }
+
+    .MRW-Content > div:last-child {
+      display: none !important;
+    }
+
+    .MRW-Line input.Arg2 {
+      width: 70px !important;
+    }
   }
 `;
 
@@ -122,48 +129,28 @@ const MondialRelayPicker = ({ onPointRelaisSelect }) => {
   const initializationRef = useRef(false);
 
   useEffect(() => {
-    const loadScript = async () => {
-      if (document.querySelector('script[src*="mondialrelay"]')) {
-        setIsScriptLoaded(true);
-        setIsLoading(false);
-        return;
+    const loadJQuery = async () => {
+      if (!window.jQuery) {
+        const script = document.createElement("script");
+        script.src = "https://code.jquery.com/jquery-3.6.0.min.js";
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise((resolve) => script.onload = resolve);
       }
-
-      try {
-        const mrScript = document.createElement("script");
-
-        mrScript.src =
-          "https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js";
-        mrScript.async = true;
-        document.body.appendChild(mrScript);
-
-        await new Promise((resolve) => {
-          mrScript.onload = resolve;
-        });
-
-        // Attendre que le DOM soit stable
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        setIsScriptLoaded(true);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Erreur lors du chargement des scripts:", error);
-        setIsLoading(false);
-      }
+  
+      const mrScript = document.createElement("script");
+      mrScript.src = "https://widget.mondialrelay.com/parcelshop-picker/jquery.plugin.mondialrelay.parcelshoppicker.min.js";
+      mrScript.async = true;
+      document.body.appendChild(mrScript);
+  
+      await new Promise((resolve) => mrScript.onload = resolve);
+      setIsScriptLoaded(true);
+      setIsLoading(false);
     };
-
-    loadScript();
-
-    return () => {
-      if (window.jQuery && widgetContainerRef.current) {
-        try {
-          window.jQuery(widgetContainerRef.current).empty();
-        } catch (error) {
-          console.error("Erreur lors du nettoyage:", error);
-        }
-      }
-    };
+  
+    loadJQuery();
   }, []);
+  
 
   useEffect(() => {
     const initializeWidget = () => {

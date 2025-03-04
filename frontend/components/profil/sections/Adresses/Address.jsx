@@ -25,7 +25,7 @@ const AdressesContainer = styled.div`
   hr {
     border: 0.5px solid black;
     margin: 1rem 0;
-    width: 60%;
+    width: 100%;
   }
 
   .subtitle {
@@ -42,7 +42,7 @@ const HeaderContainer = styled.div`
 
 const SharedAddressMessage = styled.div`
   background-color: #e8f5e9;
-  color: #245e24;
+  color: black;
   padding: 12px 20px;
   border-radius: 8px;
   margin: 20px 0;
@@ -94,7 +94,7 @@ function Adresses({ isCheckout, checkoutFormData, setCheckoutFormData }) {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/address/getuseraddress`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -196,6 +196,9 @@ function Adresses({ isCheckout, checkoutFormData, setCheckoutFormData }) {
             {!hasShippingAddress && (
               <>
                 {!isCheckout && <hr />}
+
+                {/* JE PASSE UN SET FORM DATA CUSTOM QUI UPDATE LE SHIPPING ET LE BILLING SI SYHNCRO */}
+
                 <AddressForm
                   type="unsync-shipping"
                   onAddressCreated={handleAddressCreated}

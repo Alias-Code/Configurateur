@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 import { useState } from "react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useAuthContext } from "../../../context/AuthContext";
-import { TitleStyle } from "../../utils/SharedStyle";
+import { TitleStyle, FormStar } from "../../utils/SharedStyle";
 
 const Overlay = styled.div`
   display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
@@ -224,6 +224,12 @@ const EyeButton = styled.button`
   }
 `;
 
+const FormContainer = styled.form`
+  display: flex;
+  flex-direction: column; /* Force les éléments à s'empiler */
+  gap: 1rem; /* Ajoute de l'espace entre les éléments */
+`;
+
 export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, modalAnimation, setModalAnimation }) {
   const { login } = useAuthContext();
   const { setNotifications } = useNotificationsContext();
@@ -342,7 +348,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
       const dataToSend = {
         prenom,
         nom,
-        email,
+        email: email.toLowerCase(),
         tel,
         password,
         ...(type === "professionnel" ? { adresse, siret, societe, profession } : {}),
@@ -350,7 +356,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
       };
 
       try {
-        const response = await fetch(`http://localhost:3000/api/auth/signup`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -369,12 +375,15 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
         } else {
           handleCloseSignUp();
           login(data.token);
-          setTimeout(() => {
-            setNotifications({
-              content: ["Inscription réalisée avec succès."],
-              type: "success",
-            });
-          }, 5300);
+          setTimeout(
+            () => {
+              setNotifications({
+                content: ["Inscription réalisée avec succès."],
+                type: "success",
+              });
+            },
+            window.location.pathname !== "/configuration" ? 5300 : 100 // PAS DE DELAI SI IL SE CONNECTE DEPUIS CONFIGURATION CAR IL N'Y A PAS D'ANIMATION VIDEO
+          );
         }
       } catch (error) {
         setNotifications({
@@ -412,7 +421,7 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
         {/* FORM */}
 
         {type !== "" && (
-          <>
+          <FormContainer onSubmit={handleSubmit}>
             <TitleStyle>
               {type === "particulier"
                 ? "Inscrivez-vous en tant que particulier"
@@ -421,21 +430,29 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
             <div className="inputGroup">
               <div className="entryarea">
                 <Input type="text" name="prenom" value={formData.prenom} onChange={handleChange} required />
-                <div className="label">Prénom*</div>
+                <div className="label">
+                  Prénom<FormStar>*</FormStar>
+                </div>
               </div>
               <div className="entryarea">
                 <Input type="text" name="nom" value={formData.nom} onChange={handleChange} required />
-                <div className="label">Nom*</div>
+                <div className="label">
+                  Nom<FormStar>*</FormStar>
+                </div>
               </div>
             </div>
             <div className="inputGroup">
               <div className="entryarea">
                 <Input type="email" name="email" value={formData.email} onChange={handleChange} required />
-                <div className="label">Email*</div>
+                <div className="label">
+                  Email<FormStar>*</FormStar>
+                </div>
               </div>
               <div className="entryarea">
                 <Input type="tel" name="tel" value={formData.tel} onChange={handleChange} required />
-                <div className="label">Téléphone*</div>
+                <div className="label">
+                  Téléphone<FormStar>*</FormStar>
+                </div>
               </div>
             </div>
             <div className="entryarea">
@@ -446,9 +463,14 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
                 onChange={handleChange}
                 required
               />
-              <div className="label">Mot de passe*</div>
-              <EyeButton onClick={togglePasswordVisibility}>
-                <img src="eye.svg" alt="Icône pour afficher le mot de passe" />
+              <div className="label">
+                Mot de passe<FormStar>*</FormStar>
+              </div>
+              <EyeButton type="button" onClick={togglePasswordVisibility}>
+                <img
+                  src={showPassword ? "/eyeoff.svg" : "/eye.svg"}
+                  alt="Icône pour afficher / masquer le mot de passe"
+                />
               </EyeButton>
             </div>
 
@@ -456,21 +478,29 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
               <>
                 <div className="entryarea">
                   <Input type="text" name="adresse" value={formData.adresse} onChange={handleChange} required />
-                  <div className="label">Adresse*</div>
+                  <div className="label">
+                    Adresse<FormStar>*</FormStar>
+                  </div>
                 </div>
                 <div className="inputGroup">
                   <div className="entryarea">
                     <Input type="text" name="siret" value={formData.siret} onChange={handleChange} required />
-                    <div className="label">SIRET*</div>
+                    <div className="label">
+                      SIRET<FormStar>*</FormStar>
+                    </div>
                   </div>
                   <div className="entryarea">
                     <Input type="text" name="societe" value={formData.societe} onChange={handleChange} required />
-                    <div className="label">Nom de société*</div>
+                    <div className="label">
+                      Nom de société<FormStar>*</FormStar>
+                    </div>
                   </div>
                 </div>
                 <div className="entryarea">
                   <Select name="profession" value={formData.profession} onChange={handleChange} required>
-                    <option value="">Sélectionnez une profession*</option>
+                    <option value="">
+                      Sélectionnez une profession<FormStar>*</FormStar>
+                    </option>
                     <option value="Architecte">Architecte</option>
                     <option value="Technicien">Éléctricien</option>
                     <option value="Installeur">Installateur</option>
@@ -506,8 +536,8 @@ export default function SignUp({ isSignUpOpen, setSignUpOpen, setSignInOpen, mod
               </Checkbox>
             </CheckboxContainer>
 
-            <SubmitButton onClick={handleSubmit}>Créer le compte</SubmitButton>
-          </>
+            <SubmitButton type="submit">Créer le compte</SubmitButton>
+          </FormContainer>
         )}
       </Modal>
     </Overlay>

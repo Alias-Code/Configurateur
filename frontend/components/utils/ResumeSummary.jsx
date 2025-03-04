@@ -13,11 +13,13 @@ import { createPortal } from "react-dom";
 import QuantityButton from "./QuantityButton";
 import Spinner from "../common/Spinner";
 import { useAddToCart } from "./AddToCart";
+import SignUp from "../home/auth/SignUp";
 
 const ResumeSummaryContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 1rem 0;
 `;
 
 const TrashIcon = styled.img`
@@ -58,9 +60,18 @@ const PrixContainer = styled.div`
     font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.7rem, 2vw, 0.8rem)" : "clamp(0.4rem, 2vw, 0.6rem)")};
   }
 
-  .totalTTC {
+  .TTC {
     font-size: ${({ type }) => (type === "final_cart" ? "clamp(0.9rem, 3vw, 1rem)" : "clamp(0.6rem, 3vw, 0.8rem)")};
-    font-weight: 700;
+    font-weight: bold;
+  }
+
+  .ST {
+    font-size: clamp(0.4rem, 2.5vw, 0.75rem);
+  }
+
+  .PU {
+    font-size: 0.6rem;
+    margin-bottom: 0.4rem;
   }
 `;
 
@@ -73,7 +84,7 @@ const FinalButtonsContainer = styled.div`
   }
 `;
 
-export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
+export default function ResumeSummary({ priceHT, type, quantity, itemIndex, finalPrice }) {
   // --- ÉTATS ET RÉFÉRENCES ---
 
   const { setCheckoutAnimation } = useAnimationContext();
@@ -87,8 +98,18 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
   const [isSignInOpen, setSignInOpen] = useState(false);
   const [isSignUpOpen, setSignUpOpen] = useState(false);
   const [modalAnimation, setModalAnimation] = useState("");
-  const [loading, setLoading] = useState(false);
   const [number, setNumber] = useState(1);
+
+  // --- SPINNER ---
+
+  const [invoiceSpinner, setInvoiceSpinner] = useState(false);
+  const [cartSpinner, setCartSpinner] = useState(false);
+
+  // --- PRICES ---
+
+  const TVA = (priceHT * 0.2).toFixed(2);
+  const TTC = (priceHT + parseFloat(TVA)).toFixed(2);
+  const PU = ((priceHT + parseFloat(TVA)) / quantity).toFixed(2);
 
   useEffect(() => {
     setNumber(type === "cart" ? quantity : number);
@@ -127,8 +148,10 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
       return configWithoutImage;
     });
 
+    setInvoiceSpinner(true);
+
     try {
-      const response = await fetch(`http://localhost:3000/api/order/generateinvoice`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/generateinvoice`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,18 +171,22 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
           content: ["Votre devis a été généré avec succès."],
           type: "success",
         });
+        setInvoiceSpinner(false);
       } else {
         const data = await response.json();
         setNotifications({
           content: [data.message || "Une erreur est survenue."],
           type: "error",
         });
+        setInvoiceSpinner(false);
       }
     } catch (error) {
       setNotifications({
-        content: ["Une erreur est survenue lors de la connexion."],
+        content: ["Une erreur est survenue lors de la génération du PDF."],
         type: "error",
       });
+      console.error(error);
+      setInvoiceSpinner(false);
     }
   };
 
@@ -175,6 +202,7 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
       handleOpenSignIn();
     }
   }
+
   // --- RENDER ---
 
   return (
@@ -184,7 +212,7 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
           <CartContainer>
             {/* QUANTITE POUR PRODUIT UNITAIRE */}
 
-            {type !== "final_cart" && type !== "history" && (
+            {type !== "final_cart" && type !== "history" && type !== "orderHistory" && (
               <QuantityButton number={number} setNumber={setNumber} type={type} itemIndex={itemIndex} />
             )}
 
@@ -193,9 +221,11 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
               <Button
                 className="cartButton"
                 borderColor={"white"}
+                bgColor={"transparent"}
                 bgColorHover={"transparent"}
-                onClick={() => addToCart(number, setNumber, type)}>
-                {loading && <Spinner />}
+                // PAS DE ON CLICK SI LE SPINNER EST EN COURS
+                onClick={() => !cartSpinner && addToCart(number, setNumber, type, setCartSpinner)}>
+                {cartSpinner && <Spinner />}
                 <img src="/cart.svg" alt="Icone d'ajout au panier" />
               </Button>
             ) : type === "cart" ? (
@@ -205,15 +235,16 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
                 src="trash.svg"
                 alt="Supprimer le produit"
               />
-            ) : type !== "history" ? (
+            ) : type !== "history" && type !== "orderHistory" ? (
               // --- FINAL CART ---
               <FinalButtonsContainer>
                 <Button type="checkout" bgColorHover={"#419741"} bgColor="black" onClick={handleCheckoutClick}>
-                  <img className="bag" src="/checkout.svg" alt="Icône du panier" />
+                  <img className="bag" src="/shopping-cart.svg" alt="Icône du panier" />
                   <p>PAYER EN LIGNE</p>
                 </Button>
 
                 <Button onClick={handleCreateInvoice} type="checkout" bgColorHover={"#419741"} bgColor="black">
+                  {invoiceSpinner && <Spinner />}
                   <img className="bag" src="/invoice.svg" alt="Icône du panier" />
                   <p>SAUVEGARDER EN DEVIS</p>
                 </Button>
@@ -237,9 +268,19 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
         {/* GLOBAL PRICE */}
 
         <PrixContainer type={type}>
-          <p>MONTANT HT : {priceHT.toFixed(2)}€</p>
-          <p>TVA 20% : {(priceHT * 0.2).toFixed(2)}€</p>
-          <p className="totalTTC">TOTAL TTC : {(priceHT + priceHT * 0.2).toFixed(2)}€</p>
+          {type !== "final_cart" && type !== "checkout" && <p className="PU">Prix Unitaire : {PU}€</p>}
+
+          {!finalPrice ? (
+            <>
+              <p className="ST">Sous Total : {TTC}€</p>
+            </>
+          ) : (
+            <>
+              <p className="TTC">Total TTC : {TTC}€</p>
+            </>
+          )}
+
+          {(type === "final_cart" || type === "checkout") && <p>Dont TVA 20% : {TVA}€</p>}
         </PrixContainer>
       </ResumeSummaryContainer>
 
@@ -254,6 +295,13 @@ export default function ResumeSummary({ priceHT, type, quantity, itemIndex }) {
             modalAnimation={modalAnimation}
             setModalAnimation={setModalAnimation}
             warningMessage={true}
+          />
+          <SignUp
+            isSignUpOpen={isSignUpOpen}
+            setSignUpOpen={setSignUpOpen}
+            setSignInOpen={setSignInOpen}
+            modalAnimation={modalAnimation}
+            setModalAnimation={setModalAnimation}
           />
         </GoogleOAuthProvider>,
         document.body

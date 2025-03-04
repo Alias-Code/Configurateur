@@ -15,7 +15,7 @@ const InvoiceViewer = () => {
           return configWithoutImage;
         });
 
-        const response = await fetch("http://localhost:3000/api/order/generateinvoice", {
+        const response = await fetch("${import.meta.env.VITE_API_BASE_URL}/api/order/generateinvoice", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -40,7 +40,7 @@ const InvoiceViewer = () => {
 
     const interval = setInterval(() => {
       fetchInvoice(); // Fetch every 30 seconds
-    }, 10000); // 30 secondes
+    }, 1000000); // 30 secondes
 
     return () => clearInterval(interval); // Nettoyage de l'intervalle
   }, []);

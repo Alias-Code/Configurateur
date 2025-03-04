@@ -5,7 +5,7 @@ import { ThemeProvider } from "@emotion/react";
 import { darkTheme, lightTheme } from "../../../../App";
 
 const InfoSection = styled.div`
-  margin-bottom: 30px;
+  margin: 30px 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
@@ -48,12 +48,12 @@ const DeleteAddressButton = styled.button`
   transition: all 0.3s ease;
 
   img {
-    height: 1.2rem;
-    width: 1.2rem;
+    height: 0.9rem;
+    width: 0.9rem;
   }
 
   p {
-    font-size: 12px;
+    font-size: 9px;
     text-transform: capitalize;
   }
 
@@ -78,7 +78,7 @@ export default function AddressDisplay({ isCheckout, address, onAddressDeleted, 
       if (!token) return;
 
       try {
-        const response = await fetch(`http://localhost:3000/api/address/deleteuseraddress`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/deleteuseraddress`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -131,7 +131,7 @@ export default function AddressDisplay({ isCheckout, address, onAddressDeleted, 
 
           <InfoCard>
             <InfoLabel>Téléphone</InfoLabel>
-            <InfoValue>{address.phone || "Non renseigné"}</InfoValue>
+            <InfoValue>{address.phone}</InfoValue>
           </InfoCard>
 
           <InfoCard>

@@ -122,7 +122,7 @@ export default function MainContent() {
           Choisissez parmi une large gamme de designs et de finitions pour adapter votre installation électrique à vos
           besoins et à votre style.
         </Description>
-        <Logo src="/logo-vendome-serie-2-blanc.png" alt="Logo Lumicrea" />
+        <Logo src="/vendomeserie2_white.webp" alt="Logo Lumicrea" />
         <HrContainer>
           <Line />
           <CenteredText>Commencez votre configuration</CenteredText>
@@ -130,11 +130,11 @@ export default function MainContent() {
         </HrContainer>
         <ButtonGroup>
           <Button type="white" onClick={handleOpenSignIn}>
-            <img src="login.svg" alt="Icône de connexion" />
+            <img src="/login.svg" alt="Icône de connexion" />
             Se connecter ou s'inscrire
           </Button>
           <Button type="black" onClick={handleSkip}>
-            <img src="visitor.svg" alt="Icône de visiteur non identifié" />
+            <img src="/visitor.svg" alt="Icône de visiteur non identifié" />
             Continuer sans s'identifier
           </Button>
         </ButtonGroup>

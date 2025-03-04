@@ -106,7 +106,7 @@ export default function MainNavbar() {
       </LeftSection>
 
       <LogoContainer>
-        <img src="/Vendome.png" alt="Logo de marque Vendôme" />
+        <img src="/Vendome.webp" alt="Logo de marque Vendôme" />
       </LogoContainer>
     </NavbarWrapper>
   );

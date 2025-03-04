@@ -23,7 +23,7 @@ export default function PrisesCourantFort() {
 
   return (
     <Grid container>
-      <Step name="PRISES COURANT FORT" description="" noHr={true} category="prises-courant-fort">
+      <Step name="PRISES COURANT FORT" description="" noHr={true} category="prises-courant-fort" price="40">
         {prisesCourantFort.map((item, index) => (
           <Grid
             item
@@ -35,7 +35,7 @@ export default function PrisesCourantFort() {
             key={item.id}
             id={item.id}
             name={item.name}
-            sx={{ margin: index === 0 ? "0 2rem 0 0" : index === 1 ? "0 0 0 2rem" : "" }}
+            sx={{ margin: index === 0 ? "1.5rem 2rem 0 0" : index === 1 ? "1.5rem 0 0 2rem" : "" }}
             draggable>
             <img src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`} alt={item.alt} />
             <PriseParagraph>{item.name.replace("Prise ", "")}</PriseParagraph>

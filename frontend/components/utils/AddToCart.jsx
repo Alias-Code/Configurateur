@@ -1,5 +1,4 @@
 import html2canvas from "html2canvas";
-import { useState } from "react";
 import { useAnimationContext } from "../../context/AnimationContext";
 import { useCartContext } from "../../context/CartContext";
 import { useChoicesContext } from "../../context/ChoicesContext";
@@ -8,50 +7,49 @@ import { useNotificationsContext } from "../../context/NotificationsContext";
 export function useAddToCart() {
   const { setImageAnimation } = useAnimationContext();
   const { choices, resetConfig, setMenu, renderRef } = useChoicesContext();
-  const { calculateAllTotalItems, calculateTotalItems, setNumber } = useCartContext();
+  const { calculateAllTotalItems, calculateTotalItems } = useCartContext();
   const { setNotifications } = useNotificationsContext();
 
-  const [loading, setLoading] = useState(false);
+  const addToCart = (quantity, setQuantity, type, setCartSpinner) => {
+    setCartSpinner(true);
 
-  const addToCart = (quantity, setQuantity, type) => {
     if (renderRef.current) {
-      // --- VERIFICATION EMPLACEMENT VIDE ---
+      // --- VERIFICATION ET GESTION DES ERREURS ---
+      
+      const errorMessages = [];
 
       if (!choices.facade.id && !choices.facade.couleur && !calculateAllTotalItems(choices)) {
-        setNotifications({ content: "Vous ne pouvez pas ajouter une configuration vide au panier.", type: "error" });
-        return;
+        errorMessages.push("Vous ne pouvez pas ajouter une configuration vide au panier.");
       }
 
       const facadeId = choices.facade.id;
 
-      if (!facadeId.includes("1")) {
+      if (facadeId && !facadeId.includes("1")) {
         if (calculateAllTotalItems() === 0) {
-          setNotifications({
-            content: "Vous ne pouvez pas ajouter une façade vide au panier, sauf pour la façade simple.",
-            type: "error",
-          });
-          return;
+          errorMessages.push("Vous ne pouvez pas ajouter une façade vide au panier, sauf pour la façade simple.");
         }
 
         const facadesToCheck = facadeId.includes("2") ? 2 : facadeId.includes("3") ? 3 : 0;
 
         for (let i = 0; i < facadesToCheck; i++) {
           if (calculateTotalItems(choices.facades[i]) === 0) {
-            setNotifications({
-              content: "Vous ne pouvez pas ajouter une façade au panier avec un emplacement vide.",
-              type: "error",
-            });
-            return;
+            errorMessages.push("Vous ne pouvez pas ajouter une façade au panier avec un emplacement vide.");
+            break; // On sort après la première erreur trouvée
           }
         }
       }
 
-      // --- DÉBUT DE LA CAPTURE ---
-
-      setLoading(true);
+      // Si des erreurs sont trouvées
+      if (errorMessages.length > 0) {
+        setNotifications({
+          content: errorMessages[0], // On affiche le premier message
+          type: "error",
+        });
+        setCartSpinner(false);
+        return;
+      }
 
       // --- OPTIONS CANVA ---
-
       const options = {
         backgroundColor: null,
         scale: window.devicePixelRatio,
@@ -70,7 +68,6 @@ export function useAddToCart() {
       html2canvas(renderRef.current, options)
         .then((canvas) => {
           // --- CREATE CANVA ---
-
           const finalCanvas = document.createElement("canvas");
           const ctx = finalCanvas.getContext("2d");
 
@@ -79,11 +76,10 @@ export function useAddToCart() {
 
           ctx.drawImage(canvas, 0, 0, finalCanvas.width, finalCanvas.height);
 
-          const quality = 0.7;
-          const base64ImageData = finalCanvas.toDataURL("image/jpeg", quality);
+          const quality = 0.8;
+          const base64ImageData = finalCanvas.toDataURL("image/webp", quality);
 
           // --- ADD TO CART ---
-
           let panier = localStorage.getItem("configurations");
           panier = panier ? JSON.parse(panier) : {};
 
@@ -100,20 +96,26 @@ export function useAddToCart() {
 
           localStorage.setItem("configurations", JSON.stringify(panier));
 
-          setNotifications({ content: "Vous avez bien ajouté votre produit au panier !", type: "success" });
+          setNotifications({
+            content: "Vous avez bien ajouté votre produit au panier !",
+            type: "success",
+          });
 
-          setImageAnimation(base64ImageData);
-          setLoading(false);
+          setImageAnimation({
+            src: base64ImageData,
+            timestamp: Date.now(),
+          });
 
+          setCartSpinner(false);
           resetConfig(type);
           setQuantity(1);
 
           // FERMETURE DU MENU POUR LES MOBILES
-
           setMenu(false);
         })
         .catch((error) => {
           console.error("Erreur lors de la capture du canevas :", error);
+          setCartSpinner(false);
         });
     }
   };

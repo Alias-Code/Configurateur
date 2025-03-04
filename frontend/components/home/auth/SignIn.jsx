@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useAuthContext } from "../../../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
+import { FormStar } from "../../utils/SharedStyle";
 
 const Overlay = styled.div`
   display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
@@ -50,7 +51,7 @@ const Modal = styled.div`
     color: #a82633;
     text-decoration: none;
     text-align: center;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 
   .buttonContainer {
@@ -123,6 +124,34 @@ const Input = styled.input`
     z-index: 3000;
     padding: 0 10px;
   }
+
+  &:not(:focus):not(:valid) + .label {
+    transform: translateY(-50%);
+    left: 25px;
+    top: 50%;
+  }
+`;
+
+const EyeButton = styled.button`
+  display: flex;
+  background: none;
+  border: none;
+  position: absolute;
+  z-index: 4000;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  pointer-events: auto;
+
+  &:focus {
+    outline: none;
+  }
+
+  img {
+    height: 1.2rem;
+    width: 1.2rem;
+    cursor: pointer;
+  }
 `;
 
 const SubmitButton = styled.button`
@@ -152,23 +181,6 @@ const CreateAccountButton = styled.button`
 
   &:hover {
     background-color: #f0f0f0;
-  }
-`;
-
-const EyeButton = styled.button`
-  display: flex;
-  background: none;
-  border: none;
-  position: absolute;
-  z-index: 4000;
-  top: 50%;
-  right: 0.75rem;
-  transform: translateY(-50%);
-
-  img {
-    height: 1.2rem;
-    width: 1.2rem;
-    cursor: pointer;
   }
 `;
 
@@ -212,8 +224,10 @@ export default function SignIn({
     password: "",
   });
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
+  const togglePasswordVisibility = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowPassword(!showPassword);
   };
 
   // --- HANDLERS ---
@@ -270,12 +284,12 @@ export default function SignIn({
     const { email, password } = formData;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.toLowerCase(), password }),
       });
 
       const data = await response.json();
@@ -288,12 +302,15 @@ export default function SignIn({
       } else {
         handleCloseSignIn();
         login(data.token);
-        setTimeout(() => {
-          setNotifications({
-            content: ["Connexion réalisée avec succès."],
-            type: "success",
-          });
-        }, 5300);
+        setTimeout(
+          () => {
+            setNotifications({
+              content: ["Connexion réalisée avec succès."],
+              type: "success",
+            });
+          },
+          window.location.pathname !== "/configuration" ? 5300 : 100 // PAS DE DELAI SI IL SE CONNECTE DEPUIS CONFIGURATION CAR IL N'Y A PAS D'ANIMATION VIDEO
+        );
       }
     } catch (error) {
       setNotifications({
@@ -308,7 +325,7 @@ export default function SignIn({
   // const handleLoginSuccess = (response) => {
   //   if (response?.credential) {
   //     const encodedToken = encodeURIComponent(response.credential);
-  //     window.location.href = `http://localhost:3000/auth/google/callback?token=${encodedToken}`;
+  //     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google/callback?token=${encodedToken}`;
 
   //   } else {
   //     console.error('La réponse Google ne contient pas "credential".');
@@ -319,12 +336,15 @@ export default function SignIn({
     if (response?.credential) {
       login(response.credential);
 
-      setTimeout(() => {
-        setNotifications({
-          content: ["Connexion via Google réalisée avec succès."],
-          type: "success",
-        });
-      }, 5300);
+      setTimeout(
+        () => {
+          setNotifications({
+            content: ["Connexion via Google réalisée avec succès."],
+            type: "success",
+          });
+        },
+        window.location.pathname !== "/configuration" ? 5300 : 100 // PAS DE DELAI SI IL SE CONNECTE DEPUIS CONFIGURATION CAR IL N'Y A PAS D'ANIMATION VIDEO
+      );
     } else {
       setNotifications({
         content: ["Échec de l'authentification Google."],
@@ -344,44 +364,59 @@ export default function SignIn({
           <p className="warning">Veuillez vous inscrire pour avoir accès à toutes les fonctionnalités</p>
         )}
 
+        {/* FORMULAIRE */}
+
         <h2>Connectez-vous</h2>
-        <div className="entryarea">
-          <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
-          <div className="label">Email*</div>
-        </div>
-        <div className="entryarea">
-          <Input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-          <div className="label">Mot de passe*</div>
-          <EyeButton onClick={togglePasswordVisibility}>
-            <img src="eye.svg" alt="Icône pour afficher le mot de passe" />
-          </EyeButton>
-        </div>
-        <p>
-          <a href="https://lumicrea.fr/mot-de-passe-oublie" target="_blank">
-            Mot de passe oublié ?
-          </a>
-        </p>
-        <div className="buttonContainer">
-          <SubmitButton type="submit" onClick={handleSubmit}>
-            Connexion
-          </SubmitButton>
-          <CreateAccountButton onClick={handleOpenSignUp}>Créer un compte</CreateAccountButton>
-        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="entryarea">
+            <Input type="text" name="email" value={formData.email} onChange={handleChange} required />
+            <div className="label">
+              Email<FormStar>*</FormStar>
+            </div>
+          </div>
+          <div className="entryarea">
+            <Input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <div className="label">
+              Mot de passe<FormStar>*</FormStar>
+            </div>
+            <EyeButton type="button" onClick={togglePasswordVisibility}>
+              <img
+                src={showPassword ? "/eyeoff.svg" : "/eye.svg"}
+                alt="Icône pour afficher / masquer le mot de passe"
+              />
+            </EyeButton>
+          </div>
+
+          {/* BOUTONS */}
+
+          <p>
+            <a href="https://lumicrea.fr/mot-de-passe-oublie" target="_blank">
+              Mot de passe oublié ?
+            </a>
+          </p>
+          <div className="buttonContainer">
+            <SubmitButton type="submit">Connexion</SubmitButton>
+            <CreateAccountButton type="button" onClick={handleOpenSignUp}>
+              Créer un compte
+            </CreateAccountButton>
+          </div>
+        </form>
 
         {/* SOCIAL CONNEXION */}
 
-        <HrContainer>
+        {/* <HrContainer>
           <Line />
           <CenteredText>RÉSEAUX SOCIAUX</CenteredText>
           <Line />
         </HrContainer>
-        <GoogleLogin onSuccess={handleLoginSuccess} onError={() => console.log("Erreur")} />
+        <GoogleLogin onSuccess={handleLoginSuccess} onError={() => console.log("Erreur lors de l'inscription / connexion avec Google")} /> */}
       </Modal>
     </Overlay>
   );

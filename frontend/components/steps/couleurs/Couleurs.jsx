@@ -86,7 +86,8 @@ export default function Couleurs() {
         name="NOS COULEURS"
         description="Vous pouvez réaliser des coloris sur-mesure selon vos projets, avec des quantités minimales."
         category="couleurs"
-        width={width}>
+        width={width}
+        price="80">
         {productInformations.Couleurs.map((item) => {
           const colorName = item.name.replace("Couleur ", "").replace(/\s+/g, "");
 

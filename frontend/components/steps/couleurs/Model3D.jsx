@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import gsap from "gsap";
+import gsap from "gsap/dist/gsap";
+import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import InstructionAnimation from "../../common/animation/InstructionAnimation.jsx";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { css } from "styled-components";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { OrbitControls } from "@react-three/drei";
+import { Environment, OrbitControls } from "@react-three/drei";
 import { useMediaQueries } from "../../../config/config.js";
 
 // --- STYLES DE CANVAS ---
@@ -48,8 +49,6 @@ function Model({ scale, color, animation, instructionAnimation, setInstructionAn
   const timeline = useRef();
   const initialRotation = useRef({ x: 0, y: 0, z: 0 });
 
-  // --- ANIMATION D'INSTRUCTION ---
-
   useEffect(() => {
     if (
       !sessionStorage.getItem("instructionShown") &&
@@ -58,7 +57,6 @@ function Model({ scale, color, animation, instructionAnimation, setInstructionAn
       !hasBeenMoved &&
       mesh.current
     ) {
-      // Sauvegarde de la rotation initiale
       initialRotation.current = {
         x: mesh.current.rotation.x,
         y: mesh.current.rotation.y,
@@ -69,60 +67,27 @@ function Model({ scale, color, animation, instructionAnimation, setInstructionAn
         onComplete: () => {
           if (mesh.current) {
             gsap.to(mesh.current.rotation, {
-              onComplete: () => {
-                setInstructionAnimation(false);
-              },
+              x: initialRotation.current.x,
+              y: initialRotation.current.y,
+              z: initialRotation.current.z,
+              duration: 0.2,
+              ease: "power2.inOut",
+              onComplete: () => setInstructionAnimation(false),
             });
           }
         },
       });
 
-      // ÉTAPE DES ANIMATIONS
-
       timeline.current
-        .to(mesh.current.rotation, {
-          y: -0.4,
-          duration: 0.8,
-          ease: "power2.inOut",
-        })
-        .to(mesh.current.rotation, {
-          y: 0.4,
-          duration: 0.8,
-          ease: "power2.inOut",
-        })
-        .to(mesh.current.rotation, {
-          y: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
-        });
+        .to(mesh.current.rotation, { y: -0.4, duration: 0.8, ease: "power2.inOut" })
+        .to(mesh.current.rotation, { y: 0.4, duration: 0.8, ease: "power2.inOut" })
+        .to(mesh.current.rotation, { y: 0, duration: 0.8, ease: "power2.inOut" });
+
+      return () => {
+        if (timeline.current) timeline.current.kill();
+      };
     }
-
-    // SI L'ANIMATION EST INTERROMPUE / TERMINÉE
-
-    return () => {
-      if (timeline.current) {
-        timeline.current.kill();
-
-        // REINITIALISE L'AXE 0
-
-        if (mesh.current) {
-          gsap.to(mesh.current.rotation, {
-            x: initialRotation.current.x,
-            y: initialRotation.current.y,
-            z: initialRotation.current.z,
-            duration: 0.2,
-            ease: "power2.inOut",
-            onComplete: () => {
-              setInstructionAnimation(false);
-              sessionStorage.setItem("instructionShown", "true");
-            },
-          });
-        }
-      }
-    };
-  }, [animation, color, instructionAnimation, hasBeenMoved]);
-
-  // --- RETOUR DE LA PLAQUE EN DIAGONALE SI ELLE N'EST PLUS SELECTIONNÉE ---
+  }, [animation, color, instructionAnimation, hasBeenMoved, setInstructionAnimation]);
 
   useEffect(() => {
     if (mesh.current && animation !== color) {
@@ -136,21 +101,31 @@ function Model({ scale, color, animation, instructionAnimation, setInstructionAn
     }
   }, [animation, color]);
 
+  // Nettoyage des ressources Three.js
+  useEffect(() => {
+    return () => {
+      scene.traverse((obj) => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      });
+    };
+  }, [scene]);
+
   return (
     <mesh
       ref={mesh}
       scale={[scale, scale, scale]}
-      position={[0, 0, 0]}
+      position={animation === color ? [0, -2.3, 0] : [0, -2.2, 0]}
       rotation={animation === color ? [0, 0, 0] : [0, Math.PI / 5, 0]}>
       <primitive object={scene} />
     </mesh>
   );
 }
 
-function Model3D({ color, width, animation, setOrbitControls, orbitControls, isHovered }) {
-  // --- ÉTATS ET RÉFÉRENCES ---
+// --- COMPOSANT PRINCIPAL OPTIMISÉ ---
 
-  const { IS_XS, IS_SM, IS_MD, UP_XL, UP_XXL } = useMediaQueries();
+function Model3D({ color, width, animation, setOrbitControls, orbitControls, isHovered }) {
+  const { IS_XS, IS_SM, IS_MD, UP_XL, UP_XXL, IS_MOBILE } = useMediaQueries();
   const [instructionAnimation, setInstructionAnimation] = useState(false);
   const [resetRotation, setResetRotation] = useState(false);
   const [size, setSize] = useState({});
@@ -161,31 +136,21 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
   const instructionTimeout = useRef(null);
   const canvasRef = useRef(null);
 
-  // --- RESET LE TIMER SI IL BOUGE LE MODELE + CHECK SI IL A ETE TOUCHE POUR ANNULER L'ANIMATION D'INSTRUCTION ---
-
+  // Gestion des événements OrbitControls
   function handleOrbitControlsStart() {
-    if (!hasBeenMoved) {
-      setHasBeenMoved(true);
-    }
-
+    if (!hasBeenMoved) setHasBeenMoved(true);
     clearTimeout(inactivityTimeout.current);
   }
-
-  // --- DEMARRE UN TIMER A LA FIN DU CONTROL ---
 
   function handleOrbitControlsEnd() {
     clearTimeout(inactivityTimeout.current);
     inactivityTimeout.current = setTimeout(() => {
-      // SI LE TEMPS EST ECOULE SANS BOUGER LE MODELE
-
       if (orbitControls) {
-        const duration = 1;
-
         gsap.to(orbitControls.object.position, {
-          duration,
+          duration: 1,
           x: 0,
           y: 0,
-          z: 5, // POSITION DE LA CAMERA
+          z: 5,
           ease: "power2.inOut",
           onComplete: () => {
             setResetRotation(true);
@@ -193,93 +158,71 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
           },
         });
       }
-    }, 500);
+    }, 750);
   }
-
-  // --- EVENT START & END ORBIT CONTROL ---
 
   useEffect(() => {
     if (animation === color && orbitControls) {
       orbitControls.addEventListener("start", handleOrbitControlsStart);
       orbitControls.addEventListener("end", handleOrbitControlsEnd);
     }
-
     return () => {
       if (orbitControls) {
         orbitControls.removeEventListener("start", handleOrbitControlsStart);
         orbitControls.removeEventListener("end", handleOrbitControlsEnd);
+        clearTimeout(inactivityTimeout.current);
       }
     };
-  }, [orbitControls]);
+  }, [animation, color, orbitControls]);
 
-  // --- ADJUST PLAQUE SIZE ---
-
+  // Ajustement de la taille du Canvas
   useEffect(() => {
     const handleResize = () => {
       if (canvasRef.current && camera) {
         const width = canvasRef.current.clientWidth;
         const height = canvasRef.current.clientHeight;
-
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-
-        if (orbitControls) {
-          orbitControls.update();
-        }
+        if (orbitControls) orbitControls.update();
       }
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [camera, orbitControls]);
 
-  // --- RESET ORBIT CONTROL IF SELECTED OTHER PLAQUE ---
-
+  // Reset OrbitControls si une autre plaque est sélectionnée
   useEffect(() => {
-    if (orbitControls) {
-      orbitControls.reset();
-    }
+    if (orbitControls) orbitControls.reset();
   }, [animation, orbitControls]);
 
-  // --- START INSTRUCTION AFTER SELECTION ---
-
+  // Animation d'instruction
   useEffect(() => {
     if (animation === color && !instructionAnimation) {
-      // ATTENDRE L'ANIMATION DE LA PLAQUE
-
       instructionTimeout.current = setTimeout(() => {
         setInstructionAnimation(true);
       }, 1000);
     }
-
     return () => {
-      if (instructionTimeout.current) {
-        clearTimeout(instructionTimeout.current);
-        instructionTimeout.current = null;
-      }
+      if (instructionTimeout.current) clearTimeout(instructionTimeout.current);
       setInstructionAnimation(false);
     };
   }, [animation, color]);
 
-  // --- RESPONSIVE FUNCTIONS ---
-
+  // Fonctions responsive
   function getModelScale() {
-    if (IS_XS) return 0.045;
-    if (IS_SM) return 0.048;
-    if (IS_MD) return 0.05;
-    return 0.05;
+    let size = IS_XS ? 45 : IS_SM ? 48 : IS_MD ? 50 : UP_XXL ? 55 : 50;
+    return animation === color ? size * 1.07 : size;
   }
 
-  const getAdjustedMoveValue = (moveValue) => {
-    const isPositive = moveValue < 0 ? false : true;
-
+  function getAdjustedMoveValue(moveValue) {
+    const isPositive = moveValue >= 0;
     if (IS_XS) return isPositive ? moveValue * 1.25 : moveValue / 0.95;
     if (IS_SM) return isPositive ? moveValue * 1 : moveValue / 1.4;
     if (IS_MD) return isPositive ? moveValue * 1.2 : moveValue / 1.5;
     if (UP_XL) return isPositive ? moveValue * 1 : moveValue / 1.175;
     if (UP_XXL) return isPositive ? moveValue * 2 : moveValue / 1.1;
     return moveValue;
-  };
+  }
 
   function calculationMiddle() {
     let defaultWidth = width / 4;
@@ -297,34 +240,48 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
       case "BlancMat":
         return getAdjustedMoveValue(-defaultWidth / 0.75);
       default:
-        return null;
+        return 0;
     }
   }
 
-  // --- RENDU DU CANVAS ---
-
   return (
     <>
-      {/* INSTRUCTIONS */}
-
       {instructionAnimation && !hasBeenMoved && !sessionStorage.getItem("instructionShown") && (
         <InstructionAnimation calculationMiddle={calculationMiddle} isXs={IS_XS} upXXL={UP_XXL} />
       )}
-
-      {/* CANVA */}
-
       <Canvas
+        gl={{
+          preserveDrawingBuffer: true,
+          toneMapping: ACESFilmicToneMapping,
+          outputColorSpace: SRGBColorSpace,
+          toneMappingExposure: color === "BlancMat" ? 0.3 : animation === color ? 0.7 : 0.5,
+          powerPreference: "low-power",
+          antialias: !IS_MOBILE,
+        }}
+        dpr={IS_MOBILE ? 1 : Math.min(window.devicePixelRatio, 2)} // Limite DPR pour perf
         ref={canvasRef}
         css={() => canvasStyle(IS_XS, UP_XXL, size, color, animation, calculationMiddle, isHovered)}
         camera={{ position: [0, 0, 5], fov: 75 }}
         onCreated={({ camera }) => setCamera(camera)}>
-        {/* LIGHTS */}
-
-        <ambientLight intensity={1.8} />
-        <spotLight position={[10, 10, 10]} intensity={1} castShadow />
-
-        {/* MODEL 3D */}
-
+        <Environment
+          files={color === "Acier" ? "/overcast_soil_puresky_1k.hdr" : "/aristea_wreck_puresky_1k.hdr"}
+          environmentRotation={animation === color ? [0, Math.PI / 8, 12] : [1, Math.PI / 6, 7]}
+          environmentIntensity={
+            color !== animation && color === "BlancMat"
+              ? 3
+              : color !== animation
+              ? 1
+              : color === "Bronze"
+              ? 2.5
+              : color === "Noir"
+              ? 4.5
+              : color === "CanonDeFusil"
+              ? 2.5
+              : color === "BlancMat"
+              ? 3.5
+              : 1.5
+          }
+        />
         <Model
           scale={getModelScale()}
           color={color}
@@ -332,13 +289,7 @@ function Model3D({ color, width, animation, setOrbitControls, orbitControls, isH
           animation={animation}
           instructionAnimation={instructionAnimation}
           setInstructionAnimation={setInstructionAnimation}
-          resetRotation={resetRotation}
-          setResetRotation={setResetRotation}
-          orbitControls={orbitControls}
         />
-
-        {/* MOVEMENT SYSTEM */}
-
         {animation === color && (
           <OrbitControls
             ref={(ref) => setOrbitControls(ref)}

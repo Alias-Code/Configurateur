@@ -2,6 +2,8 @@ import React from "react";
 import AppContent from "./AppContent";
 import GlobalProvider from "./context/GlobalProvider";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 
 // --- CUSTOM THEMES ---
 
@@ -20,7 +22,7 @@ export const darkTheme = {
   textColor: "white",
   backgroundColor: "black",
   borderColor: "#444444",
-  labelColor: "#bdbdbd",
+  labelColor: "#cecece",
   displayAddressBoxColor: "transparent",
   displayAddressTextColor: "#bdbdbd",
   displayAddressBorder: "1px solid #444444",
@@ -44,12 +46,18 @@ const theme = createTheme({
 
 // --- APP ---
 
+const cache = createCache({ key: "css", prepend: true });
+
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalProvider>
-        <AppContent />
-      </GlobalProvider>
-    </ThemeProvider>
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <GoogleOAuthProvider clientId="172052439601-dkqnbasm5ouddo44abnjs0c3qepoqcc6.apps.googleusercontent.com">
+          <GlobalProvider>
+            <AppContent />
+          </GlobalProvider>
+        </GoogleOAuthProvider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 }

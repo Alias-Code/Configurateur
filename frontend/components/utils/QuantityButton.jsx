@@ -81,7 +81,7 @@ export default function QuantityButton({ number, setNumber, type, itemIndex }) {
       panier = JSON.parse(panier);
 
       if (panier[`config${itemIndex}`].quantity > 1) {
-        const newQuantity = quantity - 1;
+        const newQuantity = number - 1;
 
         panier[`config${itemIndex}`].quantity = newQuantity;
         localStorage.setItem("configurations", JSON.stringify(panier));

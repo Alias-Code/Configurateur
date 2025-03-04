@@ -6,9 +6,8 @@ import PaymentMethod from "./checkout-steps/PaymentMethod";
 import Shipping from "./checkout-steps/Shipping";
 import Adresses from "../profil/sections/adresses/Address";
 import Spinner from "../common/Spinner";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNotificationsContext } from "../../context/NotificationsContext";
-import { useMediaQueries } from "../../config/config";
 
 const CheckoutContainer = styled.div`
   margin: 0 auto;
@@ -22,18 +21,6 @@ const CheckoutContainer = styled.div`
 
 const CheckoutHeader = styled.div`
   position: relative;
-
-  img {
-    position: absolute;
-    z-index: 999999;
-    right: 2%;
-    top: 50%;
-    transform: translateY(-50%);
-    filter: invert(1);
-    width: 2rem;
-    height: 2rem;
-    cursor: pointer;
-  }
 `;
 
 const CheckoutTitle = styled.h1`
@@ -43,6 +30,7 @@ const CheckoutTitle = styled.h1`
   margin-top: 2rem;
   opacity: 1;
   transition: opacity 0.5s ease;
+  letter-spacing: 2px;
 `;
 
 const CartSummaryButton = styled.button`
@@ -64,7 +52,7 @@ const CartSummaryButton = styled.button`
     background-color: white;
   }
 
-  svg {
+  img {
     transform: ${({ expanded }) => (expanded ? "rotate(180deg)" : "rotate(0deg)")};
     transition: transform 0.4s ease;
   }
@@ -119,28 +107,30 @@ const CheckoutButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem;
+  width: fit-content;
+  padding: 0.75rem 1rem;
   margin: 1rem 0;
   background-color: #bdbdbd;
   border: 1px solid black;
   color: black;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   transition: background-color 0.3s ease;
   position: relative;
   overflow: hidden;
   cursor: pointer;
 
   img {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 0.8rem;
+    height: 0.8rem;
     flex-shrink: 0;
+    transform: translateY(-0.5px);
   }
 
   p {
-    font-size: clamp(10px, 2vw, 20px);
+    font-size: clamp(9px, 1.5vw, 10px);
+    letter-spacing: 1px;
     flex-shrink: 0;
     margin: 0;
   }
@@ -179,24 +169,17 @@ const CheckoutButton = styled.button`
 
 const FinalResume = styled.div`
   display: flex;
-
-  & > button {
-    flex: 0 0 60%;
-  }
-
-  & > div {
-    flex: 0 0 40%;
-    justify-content: flex-end;
-  }
+  justify-content: center;
 `;
 
 const ResumeContainer = styled.div`
-  color: #333;
+  color: white;
   overflow: auto;
+  position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2rem;
+  align-items: flex-end;
+  gap: 1rem;
   max-height: ${({ expanded }) => (expanded ? "75vh" : "0")};
   width: 100%;
   transition: all 0.75s ease;
@@ -209,16 +192,54 @@ const ResumeContainer = styled.div`
   }
 `;
 
+const GoBottomArrowContainer = styled.div`
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  height: 0;
+  z-index: 99999999999999;
+  transition: opacity 0.3s ease;
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  pointer-events: ${({ $visible }) => ($visible ? "auto" : "none")};
+`;
+
+const GoBottomArrow = styled.div`
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 35px;
+  height: 35px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  img {
+    width: 50%;
+    height: 50%;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    img {
+      transform: translateY(2px);
+    }
+  }
+`;
+
 const ItemContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
+  padding-right: 0.5rem;
 
   .imagePreview {
-    height: 13rem;
-    width: 13rem;
-    border-radius: 5px;
+    height: 9rem;
+    width: 9rem;
   }
 
   @media (max-width: 768px) {
@@ -229,6 +250,45 @@ const ItemContainer = styled.div`
 
 const ResumeSection = styled.div`
   width: 100%;
+`;
+
+const FreeShipping = styled.div`
+  background-color: ${({ $freeShipping }) =>
+    $freeShipping ? "rgba(210, 255, 214, 0.427)" : "rgba(255, 113, 127, 0.514)"};
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+`;
+
+const ReturnButton = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  position: absolute;
+  background-color: white;
+  border-radius: 5px;
+  right: 0;
+  top: 50%;
+  padding: 6px;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  img {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  p {
+    color: black;
+    font-weight: 700;
+    font-size: 10px;
+  }
 `;
 
 const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
@@ -242,6 +302,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [userAddresses, setUserAddresses] = useState([]);
   const [orderDone, setOrderDone] = useState(false);
+  const [arrowVisible, setArrowVisible] = useState(true);
   const [formData, setFormData] = useState({
     shipping: {
       fullName: "",
@@ -263,7 +324,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
     note: "",
   });
 
-  const { IS_MOBILE } = useMediaQueries();
+  const freeShipping = priceHT >= 500;
 
   // --- FETCH USER DATA ---
 
@@ -272,7 +333,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/address/getuseraddress`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -313,18 +374,26 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
 
     // --- VERIF IF NO ADDRESS ---
 
-    if (!userAddresses || userAddresses.length === 0) {
-      const phoneRegex = /^[0-9]{10}$/;
+    const phoneRegex = /^[0-9]{10}$/;
 
-      if (!formData.fullName) {
+    const adressIncomplete =
+      !formData.shipping.fullName &&
+      !formData.shipping.address &&
+      !formData.shipping.postalCode &&
+      !formData.shipping.city &&
+      formData.shipping.phone &&
+      !phoneRegex.test(formData.shipping.phone);
+
+    if ((!userAddresses || userAddresses.length === 0) && !adressIncomplete) {
+      if (!formData.shipping.fullName) {
         messages.push("Veuillez entrer votre nom et prénom.");
       }
 
-      if (!formData.address || !formData.postalCode || !formData.city) {
+      if (!formData.shipping.address || !formData.shipping.postalCode || !formData.shipping.city) {
         messages.push("Veuillez entrer une adresse valide.");
       }
 
-      if (formData.phone && !phoneRegex.test(formData.phone)) {
+      if (!formData.shipping.phone || (formData.shipping.phone && !phoneRegex.test(formData.shipping.phone))) {
         messages.push("Veuillez entrer un numéro de téléphone valide.");
       }
     }
@@ -352,7 +421,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
       setLoading(true);
 
       try {
-        const response = await fetch(`http://localhost:3000/api/order/checkout`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/checkout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -360,6 +429,7 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
           },
           body: JSON.stringify({
             note: formData.note,
+            formAddress: formData.shipping,
             selectedDelivery,
             selectedPayment,
             cart,
@@ -420,10 +490,14 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
 
   function calculatePrice(priceHT) {
     const shippingPrice =
-      selectedDelivery === "Point Relai - Mondial Relay"
+      freeShipping && selectedDelivery !== "Domicile - Chronopost"
+        ? 0
+        : selectedDelivery === "Point Relai - Mondial Relay"
         ? 4.99
         : selectedDelivery === "Domicile - Colissimo"
         ? 7.99
+        : selectedDelivery === "Domicile - Chronopost"
+        ? 9.99
         : 0;
 
     const priceTTC = priceHT + shippingPrice;
@@ -431,12 +505,47 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
     return priceTTC;
   }
 
+  // GO TO BOTTOM SYSTEM
+
+  const resumeContainerRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (resumeContainerRef.current) {
+      resumeContainerRef.current.scrollTo({
+        top: resumeContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setArrowVisible(false);
+    }
+  };
+
+  const handleScroll = () => {
+    if (resumeContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = resumeContainerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 50;
+      setArrowVisible(!isNearBottom);
+    }
+  };
+
+  useEffect(() => {
+    const container = resumeContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (container) container.removeEventListener("scroll", handleScroll);
+    };
+  }, [expandedSummary]);
+
   // RETURN
 
   return (
     <CheckoutContainer>
       <CheckoutHeader>
-        <img src="close.svg" alt="" onClick={() => handleClose()} />
+        <ReturnButton onClick={() => handleClose()}>
+          <img src="/back.svg" alt="" />
+          <p>Retour au Configurateur</p>
+        </ReturnButton>
         <CheckoutTitle>{!orderDone ? "FINALISEZ VOTRE COMMANDE" : "MERCI POUR VOTRE COMMANDE !"}</CheckoutTitle>
       </CheckoutHeader>
 
@@ -451,12 +560,12 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
         <>
           <CartSummaryButton expanded={expandedSummary} onClick={toggleSummary}>
             <strong>RÉSUMÉ DE MON PANIER</strong>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" />
-            </svg>
+            <img src="/resume-arrow-down.svg" alt="Icône flèche orienté vers le bas" />
           </CartSummaryButton>
 
-          <ResumeContainer expanded={expandedSummary}>
+          <ResumeContainer ref={resumeContainerRef} expanded={expandedSummary}>
+            {/* RESUME ORDER */}
+
             {configurations &&
               Object.entries(configurations).map(([configKey, configuration], index) => (
                 <ItemContainer key={configKey}>
@@ -466,11 +575,18 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
                   </ResumeSection>
                 </ItemContainer>
               ))}
+            <ResumeSummary type="checkout" priceHT={calculatePrice(priceHT)} finalPrice={true} />
+
+            {/* BOTTOM ARROW */}
+
+            {expandedSummary && configurations && Object.keys(configurations).length >= 4 && (
+              <GoBottomArrowContainer $visible={arrowVisible}>
+                <GoBottomArrow onClick={scrollToBottom}>
+                  <img src="/arrow_down_black.svg" alt="Flèche pour descendre tout en bas du résumé" />
+                </GoBottomArrow>
+              </GoBottomArrowContainer>
+            )}
           </ResumeContainer>
-
-          {/* INFORMATIONS */}
-
-          {/* <Informations formData={formData} setFormData={setFormData} setCheckoutAnimation={setCheckoutAnimation} /> */}
 
           <Adresses checkoutFormData={formData} setCheckoutFormData={setFormData} isCheckout={true} />
 
@@ -480,7 +596,24 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
             selectedDelivery={selectedDelivery}
             setSelectedDelivery={setSelectedDelivery}
             handleRelayPointSelect={handleRelayPointSelect}
+            priceHT={priceHT}
           />
+
+          {/* FREE SHIPPING */}
+
+          <FreeShipping $freeShipping={freeShipping}>
+            {freeShipping ? (
+              <p>
+                Votre commande dépasse le montant de 500,00 €, vous avez débloqué la ‎
+                <strong>livraison gratuite</strong>.
+              </p>
+            ) : (
+              <p>
+                Il ne vous manque plus que <strong>{(500 - priceHT).toFixed(2)} €</strong> pour débloquer la
+                <strong>livraison gratuite</strong>.
+              </p>
+            )}
+          </FreeShipping>
 
           {/* PAIEMENT */}
 
@@ -498,12 +631,11 @@ const Checkout = ({ configurations, priceHT, setCheckoutAnimation }) => {
           <FinalResume>
             <CheckoutButton onClick={() => handleCheckout()}>
               {loading && <Spinner />}
-              <img src="lock.svg" alt="" />
+              <img src="/lock.svg" alt="Icône de cadena sécurisé" />
               <p>
                 <strong>PROCÉDER AU PAIEMENT</strong>
               </p>
             </CheckoutButton>
-            <ResumeSummary type="checkout" priceHT={calculatePrice(priceHT)} />
           </FinalResume>
         </>
       )}

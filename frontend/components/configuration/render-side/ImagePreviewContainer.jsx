@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 import Mecanisme from "./Mecanisme";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { keyframes, css } from "@emotion/react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useChoicesContext } from "../../../context/ChoicesContext";
@@ -62,11 +62,11 @@ const ArrowContainer = styled.div`
 
 const Arrow = styled.img`
   position: absolute;
-  width: clamp(1rem, 1.2vw, 1.5rem) !important;
-  height: clamp(1rem, 1.2vw, 1.5rem);
+  width: clamp(1.25rem, 1.75rem, 2.5rem) !important;
+  height: clamp(1.25rem, 1.75rem, 2.5rem) !important;
   top: ${({ positiony }) => `${positiony}`};
   left: ${({ positionx }) => `${positionx}`};
-  transform: ${({ rotateValue }) => `translate(-160%, -50%) rotate(${rotateValue})`};
+  transform: ${({ rotateValue }) => `translate(-130%, -25%) rotate(${rotateValue})`};
   transition: all 0.4s ease;
 
   ${({ isSelected, glowColor }) =>
@@ -112,9 +112,16 @@ const AnimatedImage = styled.img`
   top: 0%;
   right: 0%;
   height: auto;
-  animation: ${(props) => moveToCart(props.cartRef)} 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: ${(props) => moveToCart(props.cartRef)} 1.5s ease forwards;
   width: 25% !important;
   z-index: 9999999999999999999999 !important;
+`;
+
+const CustomImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.2;
 `;
 
 export default function ImagePreviewContainer({ type, renderRef }) {
@@ -125,6 +132,20 @@ export default function ImagePreviewContainer({ type, renderRef }) {
   const { IS_MOBILE } = useMediaQueries();
 
   const numberOfFacade = parseInt(choices.facade.id.slice(-1));
+
+  // --- EVITE LES MULTIPLES RENDU DE L'ANIMATION ---
+
+  // --- HANDLERS ---
+
+  function handleClick(number) {
+    setNotifications({ content: `Vous avez sélectionné la plaque N°${number}`, type: "success" });
+    setSelectedFacade(number);
+  }
+
+  function handleCloseMenu() {
+    setMenu(false);
+    setActiveTab(0);
+  }
 
   const [mecanismeRenderPosition, setMecanismeRenderPosition] = useState({
     simple: {
@@ -142,8 +163,8 @@ export default function ImagePreviewContainer({ type, renderRef }) {
     double: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "50%", positionX: "37%" },
-          2: { positionY: "48.5%", positionX: "63%" },
+          1: { positionY: "50.4%", positionX: "37.5%" },
+          2: { positionY: "48.8%", positionX: "63%" },
         },
         deuxemplacements: {
           1: { positionY: "50%", positionX: "31.5%" },
@@ -154,8 +175,8 @@ export default function ImagePreviewContainer({ type, renderRef }) {
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "38%", positionX: "48.5%" },
-          2: { positionY: "62%", positionX: "51.5%" },
+          1: { positionY: "37%", positionX: "49%" },
+          2: { positionY: "63%", positionX: "52.2%" },
         },
         deuxemplacements: {
           1: { positionY: "37%", positionX: "44.5%" },
@@ -170,8 +191,8 @@ export default function ImagePreviewContainer({ type, renderRef }) {
       horizontale: {
         unemplacement: {
           1: { positionY: "51%", positionX: "26%" },
-          2: { positionY: "49.5%", positionX: "50%" },
-          3: { positionY: "48%", positionX: "73.5%" },
+          2: { positionY: "49.5%", positionX: "50.5%" },
+          3: { positionY: "48%", positionX: "74%" },
         },
         deuxemplacements: {
           1: { positionY: "51%", positionX: "21.5%" },
@@ -184,33 +205,21 @@ export default function ImagePreviewContainer({ type, renderRef }) {
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "26%", positionX: "47%" },
-          2: { positionY: "50%", positionX: "50.5%" },
-          3: { positionY: "73%", positionX: "54%" },
+          1: { positionY: "24.5%", positionX: "47.5%" },
+          2: { positionY: "49.5%", positionX: "50.5%" },
+          3: { positionY: "75%", positionX: "53.75%" },
         },
         deuxemplacements: {
-          1: { positionY: "25%", positionX: "42.5%" },
-          2: { positionY: "24.5%", positionX: "51.5%" },
-          3: { positionY: "48.5%", positionX: "46%" },
-          4: { positionY: "48%", positionX: "55%" },
-          5: { positionY: "72%", positionX: "49.5%" },
-          6: { positionY: "71.5%", positionX: "58.5%" },
+          1: { positionY: "24%", positionX: "43.5%" },
+          2: { positionY: "23.5%", positionX: "52%" },
+          3: { positionY: "49.5%", positionX: "46.5%" },
+          4: { positionY: "49%", positionX: "55%" },
+          5: { positionY: "75%", positionX: "50%" },
+          6: { positionY: "74.4%", positionX: "58.5%" },
         },
       },
     },
   });
-
-  // --- HANDLERS ---
-
-  function handleClick(number) {
-    setNotifications({ content: `Vous avez sélectionné la plaque N°${number}`, type: "success" });
-    setSelectedFacade(number);
-  }
-
-  function handleCloseMenu() {
-    setMenu(false);
-    setActiveTab(0);
-  }
 
   return (
     <ImageContainer ref={renderRef} data-render-container="true">
@@ -220,18 +229,22 @@ export default function ImagePreviewContainer({ type, renderRef }) {
 
       {menu && (
         <CloseButton className="no-screenshot" onClick={handleCloseMenu}>
-          <img src="/cancel.svg" alt="" />
+          <img src="/cancel.svg" alt="Icone de suppression" />
         </CloseButton>
       )}
 
-      {/* ANIMATION IMAGE ADD TO CART */}
+      {/* <CustomImage src="/prise.png" /> */}
 
-      {imageAnimation && !IS_MOBILE && (
+      {/* ANIMATION IMAGE ADD TO CART (Vérif du temps pour ne pas que l'animation rejoue si le contexte est rechargé) */}
+
+      {imageAnimation && !IS_MOBILE && Date.now() - imageAnimation.timestamp < 200 && (
         <AnimatedImage
-          src={imageAnimation}
+          src={imageAnimation.src}
           alt="Produit ajouté au panier"
           cartRef={cartImageAnimation.current}
-          onAnimationEnd={() => setImageAnimation(false)}
+          onAnimationEnd={() => {
+            setImageAnimation(false);
+          }}
         />
       )}
 
@@ -240,7 +253,7 @@ export default function ImagePreviewContainer({ type, renderRef }) {
       {/* {Array.from({ length: numberOfFacade }).map((_, index) => {
               const facadeType = choices.facade.name.split(" ")[1].toLowerCase();
               const facadeOrientation = choices.facade.name.split(" ")[2].toLowerCase();
-              const position = mecanismeRenderPosition[facadeType][facadeOrientation]["unemplacement"][index + 1];
+              const position = mecanismeRenderPosition.current[facadeType][facadeOrientation]["unemplacement"][index + 1];
     
               return (
                 <DroppableZone key={index} index={index} positionx={position.positionX} positiony={position.positionY} />
@@ -258,8 +271,9 @@ export default function ImagePreviewContainer({ type, renderRef }) {
 
           // AJUSTEMENT DES FLECHES SELON PLUSIEURS FACTEURS POUR UN RENDU PARFAIT VU QUE LA PLAQUE EST EN PERSPECTIVE
 
-          const adjustArrowVerticale = index !== 0 && index - 1;
-          const adjustArrowHorizontale = index === 2 ? index - 1 : index;
+          const adjustArrowVerticale =
+            facadeType === "double" ? (index === 1 ? index - 0.5 : index + 0.25) : index === 2 ? index - 1 : index;
+          const adjustArrowHorizontale = index === 2 ? index - 2 : index === 1 ? index - 1 : index - 1.25;
 
           const positionX =
             facadeOrientation === "verticale"
@@ -268,12 +282,12 @@ export default function ImagePreviewContainer({ type, renderRef }) {
 
           const positionY =
             facadeOrientation === "horizontale" || facadeOrientation === "neutre"
-              ? parseInt(position.positionY) - 21 + adjustArrowHorizontale + "%"
+              ? parseInt(position.positionY) - 20.5 + adjustArrowHorizontale + "%"
               : position.positionY;
 
           // ROTATION DE LA FLECHE SELON L'ORIENTATION
 
-          const rotateValue = facadeOrientation === "verticale" ? "-90deg" : "-5deg";
+          const rotateValue = facadeOrientation === "verticale" ? "-95deg" : "-4deg";
 
           const currentFacade = choices.facades[index];
 
@@ -284,6 +298,8 @@ export default function ImagePreviewContainer({ type, renderRef }) {
           if (emplacementIsFull(currentFacade)) {
             glowColor = "179, 56, 43";
           }
+
+          // SI LA FLECHE EST SELECTIONNEE ELLE SERA BLANCHE
 
           let arrowColor = selectedFacade === index + 1 ? "white" : "black";
 
@@ -328,9 +344,9 @@ export default function ImagePreviewContainer({ type, renderRef }) {
 
           const emplacementType = numberOfMecanisme === 1 ? "unemplacement" : "deuxemplacements";
 
-          const allMecanismes = ITEM_CATEGORYS.filter((category) => category !== "gravures").flatMap((category) =>
-            (facade?.[category] || []).map((m) => ({ ...m, type: category }))
-          );
+          const allMecanismes = ITEM_CATEGORYS.filter((category) => category !== "gravures")
+            .flatMap((category) => (facade?.[category] || []).map((m) => ({ ...m, type: category })))
+            .sort((a, b) => a.time - b.time);
 
           // --- Initialise un compteur spécifique à chaque façade ---
           let currentPositionIndex = 0;
@@ -350,7 +366,7 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                     break;
 
                   case !mecanisme.name.includes("Courant") && mecanisme.name.includes("Prise"):
-                    size = 19;
+                    size = 18;
                     break;
 
                   case mecanisme.name.includes("TV"):
@@ -358,7 +374,7 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                     break;
 
                   case mecanisme.name.includes("Variateur"):
-                    size = 20;
+                    size = 19.5;
                     break;
 
                   case mecanisme.name.includes("Liseuse"):
@@ -366,7 +382,7 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                     break;
 
                   default:
-                    size = 20;
+                    size = 19;
                     break;
                 }
 
@@ -406,13 +422,24 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                   let adjustedXPosition = parseFloat(position?.positionX) || 50;
                   let adjustedYPosition = parseFloat(position?.positionY) || 50;
 
+                  if (emplacementType === "unemplacement") {
+                    adjustedYPosition -= 0.25;
+                  }
+
+                  if (mecanisme.id.includes("VA-")) {
+                    if (allMecanismes.length === 1 && mecanisme.quantity === 1) {
+                      adjustedXPosition += 0.5;
+                    }
+                  }
+
                   // RAPPROCHEMENT DES INTERRUPTEURS CYLINDRES ET RETROS
 
                   if (mecanisme.id.includes("R-") || mecanisme.id.includes("C-")) {
                     if (allMecanismes.length === 1 && mecanisme.quantity === 1) {
-                      adjustedXPosition += 1;
+                      adjustedYPosition += 0.25;
+                      adjustedXPosition += 0.5;
                     } else if (currentPositionIndex === 1) {
-                      adjustedXPosition += facadeOrientation === "verticale" ? 1 : 2.25;
+                      adjustedXPosition += facadeOrientation === "verticale" ? 1 : 2.5;
                     } else {
                       adjustedXPosition -= facadeOrientation === "verticale" ? 0.25 : -0.75;
                     }
@@ -421,7 +448,7 @@ export default function ImagePreviewContainer({ type, renderRef }) {
                   // AJUSTEMENT POSITION LISEUSE CAR SA TAILLE A GRANDEMENT CHANGEE
 
                   if (mecanisme.id.includes("LI")) {
-                    adjustedYPosition += 19.5;
+                    adjustedYPosition += 20.4;
                     adjustedXPosition += 10.5;
                   }
 

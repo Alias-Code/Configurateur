@@ -37,7 +37,7 @@ const SocialsContainer = styled.div`
 export default function Socials() {
   return (
     <SocialsContainer>
-      <img src="/logo_lumicrea.png" alt="Logo de marque LUMICREA" />
+      <img src="/logo_lumicrea.webp" alt="Logo de marque LUMICREA" />
       <div>
         <a href="https://instagram.com/lumicrea.officiel" target="_blank">
           <img src="/instagram.svg" alt="Logo de marque Instagram" />

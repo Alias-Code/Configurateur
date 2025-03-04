@@ -109,7 +109,7 @@ export default function Devis() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/order/getinvoices`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/getinvoices`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -122,9 +122,8 @@ export default function Devis() {
         // DEVIS DU PLUS RECENT AU PLUS ANCIEN
         const sortedInvoices = data.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
         setUserInvoices(sortedInvoices || []);
+        setLoading(false);
       }
-
-      setLoading(false);
     } catch (error) {
       setNotifications({ content: error.message, type: "error" });
       setLoading(false);
@@ -145,7 +144,7 @@ export default function Devis() {
 
   return (
     <DevisContainer>
-      <TitleStyle>HISTORIQUE DE VOS DEVIS</TitleStyle>
+      <TitleStyle fontWeight="700">HISTORIQUE DE VOS DEVIS</TitleStyle>
       <hr />
       {loading ? (
         <Spinner />
@@ -159,11 +158,11 @@ export default function Devis() {
             <InvoiceCard key={index}>
               <InvoiceInfo>
                 <InvoiceSource>
-                  {invoice.source === "Commande" ? <img src="/order.svg" alt="" /> : <img src="/printer.svg" alt="" />}
+                  {invoice.source === "Commande" ? <img src="/order.svg" alt="Devis provenant d'une commande" /> : <img src="/printer.svg" alt="Devis provenant d'une génération" />}
                   {decodeQuotedPrintable(invoice.source)} {invoice.source === "Commande" && `N°${invoice.orderId}`}
                 </InvoiceSource>
                 <InvoiceDate>
-                  <img src="/clock.svg" alt="" />
+                  <img src="/clock.svg" alt="Date de la création du devis" />
                   {new Date(invoice.lastModified).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",
@@ -172,7 +171,7 @@ export default function Devis() {
                 </InvoiceDate>
               </InvoiceInfo>
               <DownloadButton href={invoice.signedUrl} target="_blank">
-                <img src="/download.svg" alt="Icône de téléchargement" />
+                <img src="/download.svg" alt="Téléchargement du devis" />
                 Télécharger
               </DownloadButton>
             </InvoiceCard>

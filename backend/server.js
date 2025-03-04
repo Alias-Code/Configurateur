@@ -8,7 +8,7 @@ import helmet from "helmet";
 import mysql from "mysql2/promise";
 import passport from "passport";
 import winston from "winston";
-import { validationResult } from "express-validator";
+import compression from "compression";
 
 import addressRoutes from "./routes/addressRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -18,57 +18,35 @@ import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
-// --- WINSTON LOGS ---
-
-const logger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp({ format: "DD/MM/YYYY HH:mm:ss" }),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-    })
-  ),
-  transports: [
-    new winston.transports.File({ filename: "error.log", level: "error" }),
-    new winston.transports.File({ filename: "combined.log" }),
-    ...(process.env.NODE_ENV !== "production" ? [new winston.transports.Console()] : []),
-  ],
-});
-
 const app = express();
 
-// --- SÉCURITÉ INTERNE REQUÊTE ---
+// --- OPTIMISATION ---
 
-app.use(helmet());
+app.use(compression());
 
-app.set("trust proxy", true);
+// --- DÉMARRAGE DU SERVEUR ---
+
+const server = app.listen(3000, () => {
+  console.log("Serveur démarré sur le port 3000");
+});
 
 // --- SÉCURITÉ EXTERNE REQUÊTE CORS ---
-
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(204);
-});
 
 app.use(
   cors({
     origin: function (origin, callback) {
       const allowedOrigins = [
+        "https://configurateur.lumicrea.fr",
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:3000",
         "https://lumicrea.fr",
-        "https://configurateur-sand.vercel.app",
-        "https://configurateur-production.up.railway.app",
       ];
 
       const vercelRegex = /^https:\/\/configurateur(-\w+)?\.vercel\.app$/;
 
       if (!origin || allowedOrigins.includes(origin) || vercelRegex.test(origin)) {
-        callback(null, origin);
+        callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
       }
@@ -79,6 +57,65 @@ app.use(
     preflightContinue: false,
   })
 );
+
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
+});
+
+// --- WINSTON LOGS ---
+
+// server.js
+
+// Le logger Winston
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({ format: "DD/MM/YYYY HH:mm:ss" }),
+    winston.format.printf(({ timestamp, level, message, stack }) => {
+      if (stack) {
+        return `[${timestamp}] ${level.toUpperCase()}: ${message}\n${stack}`;
+      }
+      return `[${timestamp}] ${level.toUpperCase()}: ${message}`;
+    })
+  ),
+  transports: [
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log", level: "info" }),
+    ...(process.env.NODE_ENV !== "production"
+      ? [
+          new winston.transports.Console({
+            format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+          }),
+        ]
+      : []),
+  ],
+});
+
+// Middleware de gestion des erreurs
+app.use((err, req, res, next) => {
+  // Log l'erreur avec la stack trace et message
+  logger.error("Erreur capturée dans le middleware:", { stack: err.stack, message: err.message });
+
+  // Retourne une réponse générique d'erreur
+  res.status(500).json({
+    error: "Une erreur est survenue, veuillez réessayer plus tard.",
+  });
+});
+
+// --- SÉCURITÉ INTERNE REQUÊTE ---
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
+app.set("trust proxy", true);
 
 // --- LIMITE NOMBRE REQUETE ---
 
@@ -151,8 +188,9 @@ app.use(
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
+      httpOnly: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
     },
   })
 );
@@ -196,14 +234,6 @@ app.use(googleRoutes);
 app.use((req, res) => {
   logger.warn(`Route non trouvée: ${req.method} ${req.originalUrl}`);
   res.status(404).json({ message: "Route non trouvée" });
-});
-
-// --- DÉMARRAGE DU SERVEUR ---
-
-const PORT = process.env.PORT || 3000;
-
-const server = app.listen(PORT, () => {
-  logger.info(`Serveur en écoute sur le port ${PORT}`);
 });
 
 // --- ARRÊT DU SERVEUR GÉRÉ ---

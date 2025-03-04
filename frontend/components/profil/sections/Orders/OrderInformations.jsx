@@ -5,6 +5,7 @@ import Resume from "../../../configuration/render-side/Resume";
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { TitleStyle } from "../../../utils/SharedStyle";
+import { useCartContext } from "../../../../context/CartContext";
 
 const OrderModalContent = styled.div`
   background-color: white;
@@ -22,6 +23,11 @@ const OrderModalContent = styled.div`
   opacity: 0;
   transition: transform 0.4s ease, opacity 0.4s ease;
 
+  hr {
+    margin-bottom: 1rem;
+    border: 0.5px solid black !important;
+  }
+
   &.open {
     transform: scale(1);
     opacity: 1;
@@ -37,7 +43,7 @@ const OrderModalHeader = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
   color: #3b82f6;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   text-align: center;
   position: relative;
 
@@ -88,26 +94,34 @@ const ItemContainer = styled.div`
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 2rem;
 
   p {
     color: black !important;
   }
 
   hr {
-    border: 0.5px solid black !important;
+    border: none;
+    height: 0.1px;
+    background: black;
+    opacity: 0.8;
   }
 
   img {
-    margin-bottom: auto;
-    transform: translateY(10px);
-    height: 10rem;
-    width: 10rem;
-    border-radius: 5px;
+    height: 8rem;
+    width: 8rem;
   }
 `;
 
-export default function OrderDetails({ selectedOrder, handleCloseModal }) {
+const PrixContainer = styled.div`
+  text-align: right;
+  margin-top: 0.5rem;
+
+  & p:last-child {
+    font-size: 10px;
+  }
+`;
+
+export default function OrderDetails({ selectedOrder, orderTotalAmount, handleCloseModal }) {
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [animationState, setAnimationState] = useState("close");
   const [userAddresses, setUserAddresses] = useState([]);
@@ -135,7 +149,7 @@ export default function OrderDetails({ selectedOrder, handleCloseModal }) {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/address/getuseraddress`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/getuseraddress`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -161,7 +175,7 @@ export default function OrderDetails({ selectedOrder, handleCloseModal }) {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/order/getorder/${orderId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/getorder/${orderId}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -188,24 +202,23 @@ export default function OrderDetails({ selectedOrder, handleCloseModal }) {
   // --- RETURN ---
 
   return (
-    <div css={overlayStyles} className={animationState}>
-      <OrderModalContent className={animationState}>
+    <div css={overlayStyles} className={animationState} onClick={handleCloseModal}>
+      <OrderModalContent className={animationState} onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
         <OrderModalHeader>
-          <TitleStyle fontSize="1rem">Détails de la commande n°{selectedOrder?.order_number}</TitleStyle>
+          <TitleStyle fontSize="1rem" fontWeight="700">
+            Détails de la commande #{selectedOrder?.order_number}
+          </TitleStyle>
           <img src="/close.svg" alt="Fermer" onClick={handleAnimatedClose} />
         </OrderModalHeader>
 
         {/* HISTORIQUE DES ITEMS */}
         {!loadingOrder ? (
           <>
-            <TitleStyle mb="1rem" fontSize="0.8rem">
-              Résumé de votre commande :
-            </TitleStyle>
             {Object.entries(selectedOrderDetails).map(([configKey, configuration]) => (
               <ItemContainer key={configKey}>
                 <img className="imagePreview" src={configuration.image} alt="Visualisation de la configuration" />
-                <Resume type="history" configuration={configuration} />
+                <Resume type="orderHistory" configuration={configuration} />
               </ItemContainer>
             ))}
           </>
@@ -213,7 +226,19 @@ export default function OrderDetails({ selectedOrder, handleCloseModal }) {
           <Spinner />
         )}
 
+        <PrixContainer>
+          <div>
+            <p>
+              <strong>Total TTC :</strong> {orderTotalAmount} €
+            </p>
+            <p>Dont TVA (20%) : {(orderTotalAmount * 0.2).toFixed(2)} €</p>
+          </div>
+        </PrixContainer>
+
         {/* ADRESSES UTILISÉES */}
+
+        {/* <hr />
+
         <Adresses>
           <div>
             <h3>Adresse de livraison</h3>
@@ -249,7 +274,7 @@ export default function OrderDetails({ selectedOrder, handleCloseModal }) {
               <Spinner />
             )}
           </div>
-        </Adresses>
+        </Adresses> */}
       </OrderModalContent>
     </div>
   );

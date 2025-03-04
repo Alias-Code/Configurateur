@@ -26,7 +26,6 @@ const Error = styled.div`
   }
 
   img {
-    filter: invert(1);
     width: clamp(12px, 3vw, 20px);
     height: clamp(12px, 3vw, 20px);
   }

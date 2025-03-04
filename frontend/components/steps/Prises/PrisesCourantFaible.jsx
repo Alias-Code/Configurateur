@@ -23,7 +23,7 @@ export default function PrisesCourantFaible() {
 
   return (
     <Grid container>
-      <Step name="PRISES COURANT FAIBLE" description="" noHr={true} category="prises-courant-faible">
+      <Step name="PRISES COURANT FAIBLE" description="" noHr={true} category="prises-courant-faible" price="20">
         {prisesCourantFaible.map((item) => (
           <Grid item xs={3} sm={1.5} md={1.5} lg={1.5} xxl={1.5} key={item.id} id={item.id} name={item.name} draggable>
             <img src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`} alt={item.alt} />

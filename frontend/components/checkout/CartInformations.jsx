@@ -88,8 +88,8 @@ const CartIcon = styled.div`
   z-index: 9999999999999 !important;
 
   img {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: ${({ showCart }) => (showCart ? "1.3rem" : "1.75rem")};
+    height: auto;
     transition: all 0.5s ease;
 
     &:hover {
@@ -164,9 +164,8 @@ const ItemContainer = styled.div`
   }
 
   .imagePreview {
-    height: 13rem;
-    width: 13rem;
-    border-radius: 5px;
+    height: 10rem;
+    width: 10rem;
   }
 `;
 
@@ -181,9 +180,9 @@ const ResumeSection = styled.div`
 const FinalCheckoutContainer = styled.div`
   display: flex;
   justify-content: center;
-  gap: 3rem;
+  gap: 1rem;
   width: 100%;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 
   &::before {
     content: "";
@@ -198,6 +197,7 @@ const FinalCheckoutContainer = styled.div`
 
   @media screen and (max-width: 767px) {
     margin-bottom: 5rem;
+
     .container {
       width: 90%;
       padding: 0px;
@@ -266,6 +266,8 @@ export default function CartInformations() {
       checkoutAnimation={checkoutAnimation}
       isMobile={isMobile}
       onClick={!showCart ? () => setShowCart(true) : undefined}>
+      {/* CART HEADER */}
+
       <CartWrapper>
         <CartIcon
           showCart={showCart}
@@ -276,10 +278,12 @@ export default function CartInformations() {
           }}>
           <img
             ref={cartImageAnimation}
-            src={showCart ? "/arrow_down_white.svg" : "/shoppingbag.svg"}
+            src={showCart ? "/arrow_down_white.svg" : "/shopping-bag.svg"}
             alt="Icône du panier"
           />
         </CartIcon>
+
+        {/* CART CONTENT */}
 
         {!checkoutAnimation ? (
           <>
@@ -317,7 +321,7 @@ export default function CartInformations() {
 
                   <FinalCheckoutContainer>
                     <div className="container">
-                      <ResumeSummary type="final_cart" priceHT={priceHT} />
+                      <ResumeSummary type="final_cart" priceHT={priceHT} finalPrice={true} />
                     </div>
                   </FinalCheckoutContainer>
                 </ResumeContainer>

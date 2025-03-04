@@ -3,14 +3,11 @@ import { StepDivider } from "../../utils/SharedStyle";
 
 const PaymentContainer = styled.div`
   display: flex;
-  gap: 1rem;
-
-  & > div {
-    flex: 1;
-  }
+  justify-content: space-between;
 
   @media (max-width: 768px) {
     flex-direction: column;
+    gap: 1rem;
   }
 `;
 
@@ -19,12 +16,12 @@ const PaymentOption = styled.div`
   font-size: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
-  cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 1rem;
   color: white;
+  cursor: pointer;
 
   img {
     width: 2.5rem;
@@ -34,7 +31,7 @@ const PaymentOption = styled.div`
   img {
     width: 2.5rem;
     height: 2.5rem;
-    filter: invert(1);
+    
   }
 
   h3 {
@@ -74,26 +71,26 @@ export default function PaymentMethod({ selectedPayment, setSelectedPayment }) {
         <PaymentOption
           isChecked={selectedPayment === "Carte Bancaire"}
           onClick={() => setSelectedPayment("Carte Bancaire")}>
+          <div className="checkbox">
+            <p>✔</p>
+          </div>
           <img src="creditcart.svg" alt="" />
           <div>
             <h3>Carte bancaire</h3>
             <p>Paiement sécurisé en ligne</p>
-          </div>
-          <div className="checkbox">
-            <p>✔</p>
           </div>
         </PaymentOption>
 
         <PaymentOption
           isChecked={selectedPayment === "Virement Bancaire"}
           onClick={() => setSelectedPayment("Virement Bancaire")}>
+          <div className="checkbox">
+            <p>✔</p>
+          </div>
           <img src="banktransfer.svg" alt="" />
           <div>
             <h3>Virement bancaire</h3>
             <p>Effectuez un virement après avoir passé commande</p>
-          </div>
-          <div className="checkbox">
-            <p>✔</p>
           </div>
         </PaymentOption>
       </PaymentContainer>

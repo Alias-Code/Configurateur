@@ -137,6 +137,10 @@ const NotificationSection = styled.div`
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.5;
+
+    @media (max-width: 768px) {
+      font-size: 0.75rem;
+    }
   }
 `;
 

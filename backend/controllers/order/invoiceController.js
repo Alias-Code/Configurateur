@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
 import dotenv from "dotenv";
-import User from "../../models/User.js";
-import UserAddresses from "../../models/UserAddresses.js";
-import { checkAuth } from "../authController.js";
+import User from "../models/User.js";
+import UserAddresses from "../models/UserAddresses.js";
+import { checkAuth } from "./authController.js";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { S3 } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-provider-env";
@@ -31,7 +31,7 @@ const calculateItemTotal = (items) => items.reduce((sum, item) => sum + item.pri
 const calculateConfigTotal = (config) => {
   if (!config) return 0;
   const facadeTotal = config.facade?.price || 0;
-  const categories = ["cylindres", "retros", "prises", "gravures"];
+  const categories = ["cylindres", "retros", "variateurs", "liseuses", "prises", "gravures"];
 
   return (
     categories.reduce((total, category) => {
@@ -180,7 +180,7 @@ export const generateInvoice = async (req, res, params) => {
 
   const userId = isHttpCall ? req.user?.userId : params.userId;
   const cart = isHttpCall ? req.body?.cart : params.cart;
-  const configImageSaver = isHttpCall ? req.body?.configImageSaver : params.configImageSaver;
+  // const configImageSaver = isHttpCall ? req.body?.configImageSaver : params.configImageSaver;
 
   if (!userId || !cart) {
     throw new Error("Missing required data: userId or cart");
@@ -232,9 +232,45 @@ export const generateInvoice = async (req, res, params) => {
     const globalStyle = { size: 9, font: helveticaFont, color: rgb(0, 0, 0) };
     const page = pdfDoc.getPages()[0];
     const { height } = page.getSize();
-    const dateFr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    let currentPage = page;
 
-    const drawText = (text, options) => page.drawText(text, { ...globalStyle, ...options });
+    const dateFr = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    let drawText = (text, options) => currentPage.drawText(text, { ...globalStyle, ...options });
+
+    // FUNCTION CREATION DE PAGE SUPPLEMENTAIRE
+
+    const createNewPage = async () => {
+      const templatePath = path.join(process.cwd(), "public", "invoice_template.pdf");
+      const templateDoc = await PDFDocument.load(await fs.readFile(templatePath));
+
+      // Copier la première page du template
+      const [copiedPage] = await pdfDoc.copyPages(templateDoc, [0]);
+
+      // Ajouter la page copiée au document principal
+      pdfDoc.addPage(copiedPage);
+
+      const drawTextNewPage = (text, options) => copiedPage.drawText(text, { ...globalStyle, ...options });
+
+      drawTextNewPage(`${headerTitle} (Suite)`, {
+        font: helveticaBold,
+        size: 12,
+        x: 315,
+        y: copiedPage.getSize().height - 70,
+      });
+
+      drawTextNewPage(dateFr, {
+        font: helveticaBold,
+        size: 12,
+        x: 315,
+        y: copiedPage.getSize().height - 85,
+      });
+
+      return {
+        page: copiedPage,
+        startY: copiedPage.getSize().height - 305,
+        drawText: drawTextNewPage,
+      };
+    };
 
     // --- HEADER ---
 
@@ -269,10 +305,27 @@ export const generateInvoice = async (req, res, params) => {
 
     let y = height - 305;
     let totalTTC = 0;
+    const minY = 250;
 
     const cartArray = Object.values(cart);
 
     for (const [configIndex, config] of Object.entries(cartArray)) {
+      const requiredHeight = 15;
+
+      // SI LA TAILLE MAX EST ATTEINTE, ON CREE UNE NOUVELLE PAGE
+
+      if (y - requiredHeight < minY) {
+        try {
+          const newPageData = await createNewPage();
+          currentPage = newPageData.page;
+          drawText = newPageData.drawText; // On utilise directement la fonction drawText retournée
+          y = newPageData.startY;
+        } catch (error) {
+          console.error("Erreur lors de la création de la nouvelle page:", error);
+          throw error;
+        }
+      }
+
       // INCREMENTER TOTAL PAR PRIX CONFIG UNITAIRE
 
       const configTotal = calculateConfigTotal(config);
@@ -297,7 +350,7 @@ export const generateInvoice = async (req, res, params) => {
             console.error("Erreur de téléchargement de l'image:", error);
             return null;
           });
-
+          
         const image = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
 
         page.drawImage(image, {
@@ -311,7 +364,7 @@ export const generateInvoice = async (req, res, params) => {
       // TITLE OF THE CONFIG
       const facadeName = config.facade?.name || "N/A";
       const couleurName = config.couleur?.name || "N/A";
-      drawText(`${facadeName} - ${couleurName}`, { font: helveticaBold, size: 10, x: columnPositions.description, y });
+      drawText(`${facadeName} - ${couleurName}`, { font: helveticaBold, size: 9, x: columnPositions.description, y });
 
       // QUANTITY
       drawText(config.quantity.toString(), { x: adjustPositionForNumber(config.quantity, "quantity"), y });
@@ -331,11 +384,14 @@ export const generateInvoice = async (req, res, params) => {
 
       // DETAILS FACADE
       config.facades.forEach((facade, index) => {
-        if (["cylindres", "retros", "prises", "gravures"].some((category) => facade[category]?.length)) {
-          // drawText(`Plaque ${index + 1}`, { x: columnPositions.description, y });
+        if (
+          ["cylindres", "retros", "variateurs", "prises", "gravures", "liseuses"].some(
+            (category) => facade[category]?.length
+          )
+        ) {
           y -= 0;
 
-          ["cylindres", "retros", "prises", "gravures"].forEach((category) => {
+          ["cylindres", "retros", "variateurs", "prises", "gravures", "liseuses"].forEach((category) => {
             facade[category]?.forEach((item) => {
               drawText(item.name, { x: columnPositions.description, y: y - 0 });
               drawText(item.quantity.toString(), { x: columnPositions.quantity, y });
@@ -380,7 +436,9 @@ export const generateInvoice = async (req, res, params) => {
 
     // --- MOYEN DE PAIEMENT ---
 
-    drawText("Carte Bancaire", { font: helveticaBold, x: 130, y: 163 });
+    if (!res) {
+      drawText("Carte Bancaire", { font: helveticaBold, x: 130, y: 163 });
+    }
 
     // --- SAVE PDF ---
 

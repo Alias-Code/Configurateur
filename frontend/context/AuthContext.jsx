@@ -5,8 +5,8 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   // --- ÉTATS ET RÉFÉRENCES ---
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [userToken, setUserToken] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userToken, setUserToken] = useState(false);
   const [skipHome, setSkipHome] = useState(false);
   const { setEntryAnimation } = useAnimationContext();
 
@@ -15,13 +15,16 @@ export function AuthProvider({ children }) {
   function login(token) {
     localStorage.setItem("token", token);
     setUserToken(token);
-    setEntryAnimation("login_/configuration");
+
+    if (window.location.pathname !== "/configuration") {
+      setEntryAnimation("login_/configuration");
+    }
   }
 
   function logout() {
     localStorage.removeItem("token");
-    setUserToken(null);
     setIsAuthenticated(false);
+    setUserToken(null);
   }
 
   //   --- AUTH CONTEXT ---

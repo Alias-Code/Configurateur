@@ -31,7 +31,8 @@ export default function Facades() {
       <Step
         name="NOS FAÇADES"
         description="Choisissez votre façade : simple, double ou triple ainsi que son orientation verticale ou horizontale."
-        category="facades">
+        category="facades"
+        price="60">
         {productInformations.Facades.map((item) => (
           <div
             css={plaque({

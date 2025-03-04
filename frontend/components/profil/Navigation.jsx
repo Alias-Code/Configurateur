@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
-import { useAuthContext } from "../../context/AuthContext";
-import { useMediaQueries } from "../../config/config";
+import { useModalContext } from "../../context/ModalContext";
 
 const NavigationContainer = styled.div`
   display: flex;
@@ -29,7 +28,7 @@ const NavigationContainer = styled.div`
     img {
       width: 1.2rem;
       height: 1.2rem;
-      transform: translateY(-1px);
+      transform: translateY(-1.5px);
       fill: white;
     }
 
@@ -111,8 +110,7 @@ const NavItem = styled.div`
 `;
 
 export default function Navigation() {
-  const { logout } = useAuthContext();
-  const { IS_MOBILE } = useMediaQueries();
+  const { openModal } = useModalContext();
 
   return (
     <NavigationContainer>
@@ -141,7 +139,7 @@ export default function Navigation() {
         <hr />
         <Link to="details-du-compte">
           <NavItem>
-            <img src="/profil.svg" alt="" />
+            <img src="/profile.svg" alt="" />
             <p>Détails du compte</p>
           </NavItem>
         </Link>
@@ -153,21 +151,12 @@ export default function Navigation() {
           </NavItem>
         </Link>
         <hr />
-        <NavItem className="logout" onClick={logout}>
-          <img src="/logout.svg" alt="" />
+        <NavItem className="logout" onClick={() => openModal({ type: "logout", data: null })}>
+          <img src="/logout.svg" alt="Icône de déconnexion" />
           <p>Déconnexion</p>
         </NavItem>
         <hr />
       </div>
-      {/* RETOUR */}
-      {!IS_MOBILE && (
-        <Link to="/configuration">
-          <NavButton type="white">
-            <img src="/arrow_left.svg" alt="Icône de retour en arrière" />
-            Retour au configurateur
-          </NavButton>
-        </Link>
-      )}
     </NavigationContainer>
   );
 }

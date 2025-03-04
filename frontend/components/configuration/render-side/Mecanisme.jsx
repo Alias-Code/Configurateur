@@ -4,7 +4,7 @@ import { useModalContext } from "../../../context/ModalContext";
 
 const MecanismeImage = styled.div`
   position: absolute;
-  top: ${({ positiony, getup }) => (getup ? `calc(${positiony} - 1%)` : positiony)};
+  top: ${({ positiony, getup }) => (getup ? `calc(${positiony} - 1.25%)` : positiony)};
   left: ${({ positionx }) => positionx};
   transform: translate(-50%, -50%);
   width: ${({ dimension }) => dimension};

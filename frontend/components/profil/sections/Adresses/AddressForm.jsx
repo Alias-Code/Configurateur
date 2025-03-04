@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 import { useEffect, useRef, useState } from "react";
 import { useNotificationsContext } from "../../../../context/NotificationsContext";
-import { TitleStyle, CheckboxStyle } from "../../../utils/SharedStyle";
+import { TitleStyle, CheckboxStyle, FormStar } from "../../../utils/SharedStyle";
 import { Loader } from "@googlemaps/js-api-loader";
 import { useTheme } from "@emotion/react";
 
@@ -11,7 +11,7 @@ const FormGroup = styled.div`
   gap: 5rem;
   margin-bottom: 1rem;
   margin-top: 1rem;
-  width: 60%;
+  width: 70%;
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -19,6 +19,7 @@ const FormGroup = styled.div`
 
 const EntryArea = styled.div`
   position: relative;
+
   .label {
     font-family: "Roboto Flex", sans-serif;
     font-variation-settings: "wght" 400;
@@ -66,7 +67,7 @@ const Input = styled.input`
 `;
 
 const CheckboxContainer = styled.div`
-  margin-top: 1rem;
+  margin: 1rem 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -81,7 +82,7 @@ const SubmitButton = styled.button`
   border-radius: 5px;
   font-size: 0.75rem;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-bottom: 1.5rem;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
@@ -202,10 +203,10 @@ export default function AddressForm({
     if (inputType === "checkbox") {
       onUseForBillingChange?.(checked);
     } else {
-      setLocalFormData((prev) => ({
-        ...prev,
+      setFormData({
+        ...formData,
         [name]: value,
-      }));
+      });
     }
   };
 
@@ -225,7 +226,7 @@ export default function AddressForm({
       messages.push("Veuillez entrer une adresse valide.");
     }
 
-    if (localFormData.phone && !phoneRegex.test(localFormData.phone)) {
+    if (!localFormData.phone || (localFormData.phone && !phoneRegex.test(localFormData.phone))) {
       messages.push("Veuillez entrer un numéro de téléphone valide.");
     }
 
@@ -243,7 +244,7 @@ export default function AddressForm({
     const typeOfAddress = type === "unsync-shipping" && useForBilling ? "sync" : type;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/address/createuseraddress`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/address/createuseraddress`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -281,7 +282,7 @@ export default function AddressForm({
 
   return (
     <div>
-      <TitleStyle fontSize="0.9rem" color={theme.textColor} fontWeight="700">
+      <TitleStyle fontSize="0.9rem" color={theme.textColor} fontWeight="700" mb="1rem">
         Adresse de {type.split("-")[1] === "billing" ? "facturation" : "livraison"} :
       </TitleStyle>
 
@@ -289,12 +290,16 @@ export default function AddressForm({
         <FormGroup>
           <EntryArea>
             <Input type="text" name="fullName" value={localFormData.fullName} onChange={handleChange} placeholder="" />
-            <div className="label">Nom & Prénom*</div>
+            <div className="label">
+              Nom & Prénom<FormStar>*</FormStar>
+            </div>
           </EntryArea>
 
           <EntryArea>
             <Input type="tel" name="phone" value={localFormData.phone} onChange={handleChange} placeholder="" />
-            <div className="label">Téléphone (Optionnel)</div>
+            <div className="label">
+              Téléphone <FormStar>*</FormStar>
+            </div>
           </EntryArea>
         </FormGroup>
         <FormGroup>
@@ -307,7 +312,9 @@ export default function AddressForm({
               onChange={handleChange}
               placeholder=""
             />
-            <div className="label">Adresse*</div>
+            <div className="label">
+              Adresse<FormStar>*</FormStar>
+            </div>
           </EntryArea>
 
           <EntryArea>
@@ -318,7 +325,7 @@ export default function AddressForm({
               onChange={handleChange}
               placeholder=""
             />
-            <div className="label">Complément d'adresse (Optionnel)</div>
+            <div className="label">Complément d'adresse</div>
           </EntryArea>
         </FormGroup>
         <FormGroup>
@@ -330,12 +337,16 @@ export default function AddressForm({
               onChange={handleChange}
               placeholder=""
             />
-            <div className="label">Code postal*</div>
+            <div className="label">
+              Code postal<FormStar>*</FormStar>
+            </div>
           </EntryArea>
 
           <EntryArea>
             <Input type="text" name="city" value={localFormData.city} onChange={handleChange} placeholder="" />
-            <div className="label">Ville*</div>
+            <div className="label">
+              Ville<FormStar>*</FormStar>
+            </div>
           </EntryArea>
         </FormGroup>
         {type === "unsync-shipping" && (

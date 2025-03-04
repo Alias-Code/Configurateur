@@ -4,9 +4,11 @@ import styled from "@emotion/styled";
 
 export const MecanismeBoxStyle = styled.div`
   opacity: ${({ visible }) => (visible ? "1" : "0")};
+  pointer-events: ${({ visible }) => (visible ? "all" : "none")};
   position: absolute;
   top: 85%;
-  left: -10%;
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: 4px;
   background: white;
   border: 1px solid black;
@@ -46,7 +48,7 @@ export const MecanismeBoxStyle = styled.div`
     border-width: 0 18px 18px 18px;
     border-style: solid;
     width: 100%;
-    border-color: transparent transparent transparent transparent;
+    border-color: transparent;
   }
 
   @media (max-width: 900px) {
@@ -125,7 +127,7 @@ export const TitleStyle = styled.h2`
   font-size: ${(props) => props.fontSize || "1rem"} !important;
   text-transform: uppercase;
   color: ${(props) => props.color || "black"};
-  margin-bottom: ${(props) => props.mb || "0"};
+  margin-bottom: ${(props) => `${props.mb}` || "0"};
 
   @media (max-width: 768px) {
     font-size: 0.5rem;
@@ -205,4 +207,13 @@ export const StepDivider = styled.div`
     letter-spacing: 3px;
     background-color: black;
   }
+`;
+
+// --- FORM STAR ---
+
+export const FormStar = styled.span`
+  color: #e53935;
+  display: inline-block;
+  transform: translateY(-1px) scale(0.9);
+  opacity: 0.9;
 `;

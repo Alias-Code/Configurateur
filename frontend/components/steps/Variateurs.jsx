@@ -8,15 +8,15 @@ export default function Variateurs() {
 
   return (
     <Grid container>
-      <Step name="NOS VARIATEURS" description="" noHr={true} category="variateurs">
+      <Step name="NOS VARIATEURS" description="" noHr={true} category="variateurs" price="60">
         {productInformations.Variateurs.map((item) => (
           <Grid
             item
             xs={3.01}
             sm={2}
             md={1.75}
-            lg={1.5}
-            xxl={1.25}
+            lg={1.7}
+            xxl={1.6}
             key={item.id}
             id={item.id}
             name={item.name}

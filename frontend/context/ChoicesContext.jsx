@@ -42,40 +42,42 @@ export function ChoicesProvider({ children }) {
     ],
   };
 
-  const [mecanismeRenderPosition, setMecanismeRenderPosition] = useState({
+  const mecanismeRenderPosition = useRef({
     simple: {
-      unemplacement: {
-        1: { positionY: "49%", positionX: "50%" },
-      },
-      deuxemplacements: {
-        1: { positionY: "49%", positionX: "30%" },
-        1: { positionY: "49%", positionX: "60%" },
+      neutre: {
+        unemplacement: {
+          1: { positionY: "49.25%", positionX: "50%" },
+        },
+        deuxemplacements: {
+          1: { positionY: "49.25%", positionX: "45%" },
+          2: { positionY: "48.75%", positionX: "54%" },
+        },
       },
     },
 
     double: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "50%", positionX: "35%" },
-          2: { positionY: "48%", positionX: "65%" },
+          1: { positionY: "50%", positionX: "37%" },
+          2: { positionY: "48.5%", positionX: "63%" },
         },
         deuxemplacements: {
-          1: { positionY: "50%", positionX: "35%" },
-          2: { positionY: "48%", positionX: "65%" },
-          3: { positionY: "50%", positionX: "35%" },
-          4: { positionY: "48%", positionX: "65%" },
+          1: { positionY: "50%", positionX: "31.5%" },
+          2: { positionY: "49.4%", positionX: "40.5%" },
+          3: { positionY: "49%", positionX: "57.5%" },
+          4: { positionY: "48.5%", positionX: "66.5%" },
         },
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "37%", positionX: "48%" },
-          2: { positionY: "63%", positionX: "52%" },
+          1: { positionY: "37%", positionX: "48.5%" },
+          2: { positionY: "63%", positionX: "51.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "37%", positionX: "48%" },
-          2: { positionY: "63%", positionX: "52%" },
-          3: { positionY: "37%", positionX: "48%" },
-          4: { positionY: "63%", positionX: "52%" },
+          1: { positionY: "37%", positionX: "44.5%" },
+          2: { positionY: "36.5%", positionX: "53.5%" },
+          3: { positionY: "63%", positionX: "47.5%" },
+          4: { positionY: "62.3%", positionX: "56.5%" },
         },
       },
     },
@@ -83,36 +85,35 @@ export function ChoicesProvider({ children }) {
     triple: {
       horizontale: {
         unemplacement: {
-          1: { positionY: "51%", positionX: "23%" },
-          2: { positionY: "49%", positionX: "51%" },
-          3: { positionY: "47%", positionX: "78%" },
+          1: { positionY: "51%", positionX: "26%" },
+          2: { positionY: "49.5%", positionX: "50%" },
+          3: { positionY: "48%", positionX: "73.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "51%", positionX: "40%" },
-          2: { positionY: "49%", positionX: "51%" },
-          3: { positionY: "47%", positionX: "40%" },
-          4: { positionY: "51%", positionX: "60%" },
-          5: { positionY: "49%", positionX: "75%" },
-          6: { positionY: "47%", positionX: "95%" },
+          1: { positionY: "51%", positionX: "21.5%" },
+          2: { positionY: "50.5%", positionX: "30.5%" },
+          3: { positionY: "49.5%", positionX: "44.5%" },
+          4: { positionY: "49%", positionX: "53.5%" },
+          5: { positionY: "48%", positionX: "68.5%" },
+          6: { positionY: "47.5%", positionX: "77.5%" },
         },
       },
       verticale: {
         unemplacement: {
-          1: { positionY: "23%", positionX: "46.5%" },
-          2: { positionY: "49.5%", positionX: "50%" },
-          3: { positionY: "76%", positionX: "54%" },
+          1: { positionY: "25%", positionX: "47%" },
+          2: { positionY: "50%", positionX: "50.5%" },
+          3: { positionY: "74%", positionX: "53.5%" },
         },
         deuxemplacements: {
-          1: { positionY: "23%", positionX: "46.5%" },
-          2: { positionY: "49.5%", positionX: "50%" },
-          3: { positionY: "76%", positionX: "54%" },
-          4: { positionY: "23%", positionX: "46.5%" },
-          5: { positionY: "49.5%", positionX: "50%" },
-          6: { positionY: "76%", positionX: "54%" },
+          1: { positionY: "25%", positionX: "42.5%" },
+          2: { positionY: "24.5%", positionX: "51.5%" },
+          3: { positionY: "49.5%", positionX: "46%" },
+          4: { positionY: "49%", positionX: "55%" },
+          5: { positionY: "73.5%", positionX: "49.5%" },
+          6: { positionY: "73%", positionX: "58.5%" },
         },
       },
     },
-    images: [],
   });
 
   const [menu, setMenu] = useState(false);
@@ -666,6 +667,36 @@ export function ChoicesProvider({ children }) {
       case "LI-N":
         return "liseuse noir ";
 
+      // INTERRUPTEURS RETROS RENDU ICONE
+
+      case "R-CU-VV_CL-AC_P":
+        return "VV rétro cuivre acier P ";
+      case "R-AC-VV_CL-AC_P":
+        return "VV rétro acier acier P ";
+      case "R-BZ-VV_CL-AC_P":
+        return "VV rétro bronze acier P ";
+      case "R-LT-VV_CL-AC_P":
+        return "VV rétro laiton acier P ";
+      case "R-N-VV_CL-AC_P":
+        return "VV rétro noir acier P ";
+      case "R-CF-VV_CL-AC_P":
+        return "VV rétro canon acier P ";
+
+      // INTERRUPTEURS CYLINDRES RENDU ICONE
+
+      case "C-CU-VV_CL-AC_P":
+        return "BP rond cuivre acier P ";
+      case "C-AC-VV_CL-AC_P":
+        return "BP rond acier acier P ";
+      case "C-BZ-VV_CL-AC_P":
+        return "BP rond bronze acier P ";
+      case "C-LT-VV_CL-AC_P":
+        return "BP rond laiton acier P ";
+      case "C-N-VV_CL-AC_P":
+        return "BP rond noir acier P ";
+      case "C-CF-VV_CL-AC_P":
+        return "BP rond canon acier P ";
+
       default:
         return "";
     }
@@ -683,7 +714,6 @@ export function ChoicesProvider({ children }) {
         renderImage,
         setRenderImage,
         mecanismeRenderPosition,
-        setMecanismeRenderPosition,
         resetConfig,
         menu,
         setMenu,

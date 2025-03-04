@@ -2,7 +2,7 @@ import styled from "styled-components";
 import React, { useState, useEffect } from "react";
 import { useNotificationsContext } from "../../../context/NotificationsContext";
 import { useAuthContext } from "../../../context/AuthContext";
-import { TitleStyle } from "../../utils/SharedStyle";
+import { TitleStyle, FormStar } from "../../utils/SharedStyle";
 
 const HeaderContainer = styled.div`
   display: flex;
@@ -20,7 +20,7 @@ const AccountBadge = styled.span`
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.9rem;
-  background-color: #c1c1c1;
+  background-color: ${({ $isPro }) => ($isPro ? "#e8f5e9" : "rgba(193, 193, 193, 0.5)")};
   color: black;
 `;
 
@@ -122,16 +122,25 @@ const Form = styled.form`
 `;
 
 const SubmitButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
   padding: 10px;
   background-color: #1a1a1a;
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 0.75rem;
+  transition: all 0.4s ease;
   cursor: pointer;
 
+  img {
+    width: 0.9rem;
+    height: auto;
+  }
+
   &:hover {
-    background-color: #333;
+    background-color: #c22f3e;
   }
 `;
 
@@ -141,19 +150,19 @@ const DeleteUserButton = styled.button`
   background-color: #c22f3e;
   color: white;
   border-radius: 5px;
-  padding: 10px;
+  padding: 8px;
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
   transition: all 0.3s ease;
 
   img {
-    height: 1.2rem;
-    width: 1.2rem;
+    height: 0.9rem;
+    width: 0.9rem;
   }
 
   p {
-    font-size: 12px;
+    font-size: 9px;
     text-transform: capitalize;
   }
 
@@ -191,7 +200,7 @@ export default function DetailsDuCompte() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch(`http://localhost:3000/api/user/getuserdetails`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/getuserdetails`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -229,7 +238,7 @@ export default function DetailsDuCompte() {
 
     if (token) {
       try {
-        const response = await fetch(`http://localhost:3000/api/user/updatepassword`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/updatepassword`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -269,7 +278,7 @@ export default function DetailsDuCompte() {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch(`http://localhost:3000/api/user/deleteaccount`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/deleteaccount`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -304,8 +313,12 @@ export default function DetailsDuCompte() {
   return (
     <div>
       <HeaderContainer>
-        <TitleStyle>Détails du compte</TitleStyle>
-        {userInfo && <AccountBadge>{userInfo.siret ? "Compte Professionnel" : "Compte Particulier"}</AccountBadge>}
+        <TitleStyle fontWeight="700">Détails du compte</TitleStyle>
+        {userInfo && (
+          <AccountBadge $isPro={userInfo.siret}>
+            {userInfo.siret ? "Compte Professionnel" : "Compte Particulier"}
+          </AccountBadge>
+        )}
       </HeaderContainer>
 
       {userInfo && (
@@ -376,7 +389,7 @@ export default function DetailsDuCompte() {
           </InfoSection>
 
           <Form>
-            <TitleStyle>Réinitialiser mon mot de passe</TitleStyle>
+            <TitleStyle fontWeight="700">Réinitialiser mon mot de passe</TitleStyle>
             <div className="inputGroup">
               <div className="entryarea">
                 <Input
@@ -385,9 +398,14 @@ export default function DetailsDuCompte() {
                   onChange={(e) => setOldPassword(e.target.value)}
                   required
                 />
-                <div className="label">Ancien mot de passe*</div>
-                <EyeButton type="button" onClick={() => setShowOldPassword(!showOldPassword)}>
-                  <img src={showOldPassword ? "../eye.svg" : "../eye.svg"} alt="toggle visibility" />
+                <div className="label">
+                  Ancien mot de passe<FormStar>*</FormStar>
+                </div>
+                <EyeButton type="button" onClick={() => setShowOldPassword((prevState) => !prevState)}>
+                  <img
+                    src={showOldPassword ? "../eyeoff.svg" : "../eye.svg"}
+                    alt="Icône pour afficher / masquer le mot de passe"
+                  />
                 </EyeButton>
               </div>
               <div className="entryarea">
@@ -397,12 +415,18 @@ export default function DetailsDuCompte() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                 />
-                <div className="label">Nouveau mot de passe*</div>
-                <EyeButton type="button" onClick={() => setShowNewPassword(!showNewPassword)}>
-                  <img src={showNewPassword ? "../eye.svg" : "../eye.svg"} alt="toggle visibility" />
+                <div className="label">
+                  Nouveau mot de passe<FormStar>*</FormStar>
+                </div>
+                <EyeButton type="button" onClick={() => setShowNewPassword((prevState) => !prevState)}>
+                  <img
+                    src={showNewPassword ? "../eyeoff.svg" : "../eye.svg"}
+                    alt="Icône pour afficher / masquer le mot de passe"
+                  />
                 </EyeButton>
               </div>
               <SubmitButton type="submit" onClick={handleResetPassword}>
+                <img src="/reset.svg" alt="Icône de réinitialisation" />
                 Réinitialiser
               </SubmitButton>
             </div>

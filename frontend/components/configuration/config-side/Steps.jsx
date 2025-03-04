@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
 
-import Collections from "../../steps/Collections.jsx";
 import Couleurs from "../../steps/couleurs/Couleurs.jsx";
 import Facades from "../../steps/Facades.jsx";
 import Mecanismes from "../../steps/interrupteurs/Mecanismes.jsx";
@@ -10,7 +9,7 @@ import Retros from "../../steps/interrupteurs/Retros.jsx";
 import Prises from "../../steps/Prises/Prises.jsx";
 import PrisesCourantFort from "../../steps/Prises/PrisesCourantFort.jsx";
 import PrisesCourantFaible from "../../steps/Prises/PrisesCourantFaible.jsx";
-import Gravures from "../../steps/gravures/Gravures.jsx";
+import Gravures from "../../steps/Gravures.jsx";
 import Socials from "./Socials.jsx";
 import Variateurs from "../../steps/Variateurs.jsx";
 import Liseuses from "../../steps/Liseuses.jsx";

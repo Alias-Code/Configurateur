@@ -6,6 +6,7 @@ import { useChoicesContext } from "../../../context/ChoicesContext";
 import { useCartContext } from "../../../context/CartContext";
 import { useModalContext } from "../../../context/ModalContext";
 import { ITEM_CATEGORYS } from "../../../config/config.js";
+import { useAuthContext } from "../../../context/AuthContext";
 
 // --- STYLE ---
 
@@ -61,6 +62,7 @@ const Modal = () => {
   const { type, data, closeModal } = useModalContext();
   const { choices, setChoices, setSelectedFacade, resetConfig } = useChoicesContext();
   const { setConfigurations, emplacementIsFull } = useCartContext();
+  const { logout } = useAuthContext();
 
   useEffect(() => {
     // SUPPRESSION DIRECT POUR LA PARTIE RENDER, SANS POPUP DE CONFIRMATION
@@ -103,6 +105,8 @@ const Modal = () => {
 
   const handleDelete = () => {
     if (type === "cart") {
+      // SUPPRESSION D'UNE DES CONFIG DU PANIER
+
       const panier = JSON.parse(localStorage.getItem("configurations"));
       delete panier[`config${data}`];
       localStorage.setItem("configurations", JSON.stringify(panier));
@@ -116,6 +120,10 @@ const Modal = () => {
       } else if (type.includes("resume")) {
         resetConfig(type);
       }
+    } else if (type === "logout") {
+      // LOG OUT DEPUIS LE PROFIL
+
+      logout();
     }
 
     closeModal();
@@ -135,6 +143,8 @@ const Modal = () => {
               <p className="config">Êtes-vous sûr de vouloir supprimer la configuration N°{data} ?</p>
             ) : type.includes("delete_all") ? (
               <p>Attention, êtes-vous sûr de vouloir supprimer toute votre configuration ?</p>
+            ) : type === "logout" ? (
+              <p>Êtes-vous sur de vouloir vous déconnecter ?</p>
             ) : (
               ""
             )}
@@ -150,7 +160,7 @@ const Modal = () => {
               textHover={"black"}
               noPadding={true}
               onClick={handleDelete}>
-              <p>Supprimer</p>
+              <p>{type === "logout" ? "Déconnexion" : "Supprimer"}</p>
             </Button>
           </div>
         </ModalBox>

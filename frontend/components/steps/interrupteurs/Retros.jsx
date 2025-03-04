@@ -31,7 +31,7 @@ export default function Retros() {
 
   return (
     <Grid container>
-      <Step name="INTERRUPTEURS RETRO" description="" noHr={true} category="retros">
+      <Step name="INTERRUPTEURS RETRO" description="" noHr={true} category="retros"  price="40">
         {retros.map((item, index) => (
           <Grid
             onMouseEnter={() => handleMouseOver(index)}
@@ -43,9 +43,9 @@ export default function Retros() {
             item
             xs={3.01}
             sm={2}
-            md={1.75}
+            md={1.8}
             lg={1.5}
-            xxl={1.25}
+            xxl={1.4}
             key={item.id}
             id={item.id}
             name={item.name}
@@ -59,7 +59,7 @@ export default function Retros() {
                   });
                 }
               }}
-              src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`}
+              src={`/mecanismes/${idToImageName(item.id + "_CL-AC_P")}.png`}
               alt={item.name}
             />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />

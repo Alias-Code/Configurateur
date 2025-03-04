@@ -8,7 +8,7 @@ import { useModalContext } from "../../../context/ModalContext";
 
 // --- STYLED COMPONENTS ---
 const ResumeContainer = styled.div`
-  padding: ${({ type }) => (type === "resume" ? "1.5rem 1.5rem 2rem 1.5rem" : "0 0 0 1.5rem")};
+  padding: ${({ type }) => (type === "resume" ? "1.5rem" : "0 0 0 1.5rem")};
   color: white;
   width: 100%;
 
@@ -19,25 +19,38 @@ const ResumeContainer = styled.div`
 
   hr {
     margin: 0.6rem 0;
-    border: 0.5px solid white;
-  }
-
-  .hr {
-    width: 5%;
+    border: none;
+    height: 0.1px;
+    background: white;
+    opacity: 0.8;
   }
 `;
 
 const FacadeTitle = styled.p`
   display: flex;
   gap: 0.2rem;
-  font-size: 0.6rem;
+  font-size: 0.6rem !important;
+  font-weight: 600;
+  width: fit-content;
+  margin: 0.3rem 0;
+  position: relative;
+
+  &::after {
+    content: "";
+    display: block;
+    height: 0.5px;
+    width: 100%;
+    background-color: white;
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+  }
 `;
 
 const SousTitle = styled.p`
-  margin: 0.2rem 0;
   span {
     font-weight: 400;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
   }
 `;
 
@@ -45,7 +58,13 @@ const CancelIcon = styled.img`
   width: 0.8rem;
   height: 0.8rem;
   margin-right: 0.2rem;
+  transition: all 0.5s ease;
+  transform: translateY(0.5px) scale(1);
   cursor: pointer;
+
+  &:hover {
+    transform: scale(1.2);
+  }
 `;
 
 const LineInformation = styled.div`
@@ -74,9 +93,9 @@ const DetailsSection = ({ title, items, type }) => {
     <div>
       {/* CATEGORY TITLE */}
 
-      <SousTitle>
-        <span>{title} :</span> {!items || items.length === 0 ? "..." : ""}
-      </SousTitle>
+      <FacadeTitle>
+        <span>{title}</span>
+      </FacadeTitle>
 
       {/* PRODUCT IN CATEGORY */}
 
@@ -91,7 +110,7 @@ const DetailsSection = ({ title, items, type }) => {
                 onClick={() => openModal({ type: type, data: item })}
               />
             )}
-            <FacadeTitle>- {item.name}</FacadeTitle>
+            <SousTitle>- {item.name}</SousTitle>
             <p>
               x{item.quantity} - {item.price * item.quantity}€
             </p>
@@ -105,11 +124,8 @@ const DetailsSection = ({ title, items, type }) => {
 
 export default function Resume({ type, configuration, itemIndex }) {
   const { calculateConfigTotal, getAllItems } = useCartContext();
-  const { isOpen } = useModalContext();
   const { choices } = useChoicesContext();
 
-  const [showModal, setShowModal] = useState(false);
-  const [resumeItem, setResumeItem] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
 
   // DEPEND SI LA CONFIGURATION PROVIENT DU RESUME (DONC CHOICES DU CONTEXT) OU DU PANIER (DONC CONFIGURATION DU LOCAL STORAGE)
@@ -131,59 +147,48 @@ export default function Resume({ type, configuration, itemIndex }) {
 
         {/* HEADER INFORMATIONS */}
 
-        {currentConfig.couleur && (
-          <LineInformation>
-            <FacadeTitle>
-              COULEUR : {currentConfig.couleur.name.replace("Couleur ", "") || "Veuillez séléctionner une couleur"}
-            </FacadeTitle>
-          </LineInformation>
-        )}
+        <FacadeTitle>Facade</FacadeTitle>
 
-        {currentConfig.facade && (
-          <LineInformation>
-            <FacadeTitle>
-              FACADE : {currentConfig.facade.name.replace("Facade ", "") || "Veuillez séléctionner une façade"}
-            </FacadeTitle>
-            <FacadeTitle>{currentConfig.facade.price ? `${currentConfig.facade.price}€` : ""}</FacadeTitle>
-          </LineInformation>
-        )}
+        <LineInformation>
+          <SousTitle>
+            {currentConfig.facade.name.split(" ")[1] || "Veuillez sélectionner une façade"} -{" "}
+            {currentConfig.couleur.name
+              ? `Coloris ${currentConfig.couleur.name.replace("Couleur ", "")}`
+              : "Veuillez sélectionner une couleur"}
+          </SousTitle>
 
-        {type === "history" && (
-          <LineInformation>
-            <FacadeTitle>QUANTITÉ : {currentConfig.quantity}</FacadeTitle>
-          </LineInformation>
-        )}
-
-        <hr className="hr" />
+          {currentConfig.facade.id && <p>x1 - {currentConfig.facade.price}€</p>}
+        </LineInformation>
 
         {/* MECANISMES */}
 
         <DetailsSection
-          title="Interrupteur(s)"
+          title="Mécanisme(s)"
           type={type}
           items={[
             ...getAllItems(currentConfig, "cylindres"),
             ...getAllItems(currentConfig, "retros"),
             ...getAllItems(currentConfig, "variateurs"),
+            ...getAllItems(currentConfig, "prises"),
+            ...getAllItems(currentConfig, "liseuses"),
           ]}
         />
 
-        <DetailsSection title="Prise(s)" type={type} items={getAllItems(currentConfig, "prises")} />
+        {getAllItems(currentConfig, "gravures").length >= 1 && (
+          <DetailsSection title="Gravure(s)" type={type} items={getAllItems(currentConfig, "gravures")} />
+        )}
 
-        <DetailsSection title="Liseuse(s)" type={type} items={getAllItems(currentConfig, "liseuses")} />
-
-        <DetailsSection title="Gravure(s)" type={type} items={getAllItems(currentConfig, "gravures")} />
-
-        <hr />
+        {type !== "cart" && type !== "orderHistory" && <hr />}
 
         <ResumeSummary
           itemIndex={itemIndex || ""}
           priceHT={totalPrice / 1.2}
           quantity={currentConfig.quantity}
           type={type}
+          finalPrice={type === "resume" ? true : false}
         />
 
-        {type === "cart" && <hr />}
+        {(type === "cart" || type === "orderHistory") && <hr />}
       </ResumeContainer>
     </>
   );

@@ -77,7 +77,7 @@ const cardData = [
   { title: "Devis", iconSrc: "/invoice.svg", section: "/profil/devis" },
   {
     title: "Détails du compte",
-    iconSrc: "/profil.svg",
+    iconSrc: "/profile.svg",
     section: "/profil/details-du-compte",
   },
   {
@@ -102,7 +102,7 @@ export default function TableauDeBord() {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const response = await fetch(`http://localhost:3000/api/user/getuserdetails`, {
+          const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/user/getuserdetails`, {
             method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -130,7 +130,7 @@ export default function TableauDeBord() {
     <DashboardContainer>
       {/* HEADER INFORMATIONS */}
 
-      <TitleStyle>Bienvenue sur votre tableau de bord</TitleStyle>
+      <TitleStyle fontWeight="700">Bienvenue sur votre tableau de bord</TitleStyle>
       <InfoText>
         Vous êtes actuellement connecté avec l'adresse : <strong>{userInfo ? userInfo.email : "Chargement..."}</strong>
       </InfoText>

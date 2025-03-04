@@ -2,11 +2,10 @@ import React from "react";
 import styled from "@emotion/styled";
 import { useAddChoice } from "../../utils/AddChoice.jsx";
 import { TitleStyle } from "../../utils/SharedStyle.jsx";
-import { useDraggable } from "@dnd-kit/core";
 
 // --- STYLE ---
 
-const StyledP = styled.p`
+const StyledParagraph = styled.p`
   font-weight: 600;
   font-size: 0.75rem;
 
@@ -15,15 +14,27 @@ const StyledP = styled.p`
   }
 `;
 
+// const PriceParagraph = styled.p`
+//   font-weight: 300;
+//   font-size: 0.5rem;
+//   text-transform: uppercase;
+//   letter-spacing: 2px;
+//   margin-top: 0.4rem;
+
+//   @media (max-width: 600px) {
+//     font-size: ${({ fsMobile }) => fsMobile && "0.3rem"};
+//   }
+// `;
+
 const StepContainer = styled.div`
-  padding: 1rem 0;
+  padding: 1.5rem 0;
   text-align: ${({ category }) => (category === "navbar" ? "left" : "center")};
   width: 100%;
 
   hr {
     width: 85%;
     border: 0.5px solid black;
-    opacity: 0.3;
+    opacity: 0.7;
     margin: 0.5rem auto;
   }
 
@@ -39,12 +50,9 @@ const ImageContainer = styled.div`
   align-items: flex-end;
   justify-content: center;
   padding-top: ${({ $category }) =>
-    $category === "variateurs" ||
-    $category === "retros" ||
-    $category === "cylindres" ||
-    $category === "prises-courant-faible"
-      ? "0.5rem"
-      : "2rem"};
+    $category === "liseuses" || $category === "facades" || $category === "couleurs" || $category === "Gravures"
+      ? "2rem"
+      : "0rem"};
 
   transform: ${({ $category }) => ($category === "couleurs" ? "translateX(8%)" : "none")};
 
@@ -72,14 +80,15 @@ const ImageContainer = styled.div`
 
 // --- STEP ---
 
-export default function Step({ name, description, children, noHr, category }) {
+export default function Step({ name, description, children, noHr, category, price }) {
   const addChoice = useAddChoice();
 
   return (
-    <StepContainer category={category}>
+    <StepContainer category={category} noHr={noHr}>
       <TitleStyle>{name}</TitleStyle>
       {!noHr && <hr />}
-      <StyledP>{description}</StyledP>
+      <StyledParagraph>{description}</StyledParagraph>
+      {/* {price && <PriceParagraph>À partir de 50 €</PriceParagraph>} */}
       <ImageContainer $category={category}>
         {React.Children.map(children, (child) => {
           if (!React.isValidElement(child)) return null;

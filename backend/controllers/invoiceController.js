@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 import User from "../models/User.js";
 import UserAddresses from "../models/UserAddresses.js";
 import { checkAuth } from "./authController.js";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { S3 } from "@aws-sdk/client-s3";
 import { fromEnv } from "@aws-sdk/credential-provider-env";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -180,10 +179,10 @@ export const generateInvoice = async (req, res, params) => {
 
   const userId = isHttpCall ? req.user?.userId : params.userId;
   const cart = isHttpCall ? req.body?.cart : params.cart;
-  const configImageSaver = isHttpCall ? req.body?.configImageSaver : params.configImageSaver;
+  // const configImageSaver = isHttpCall ? req.body?.configImageSaver : params.configImageSaver;
 
   if (!userId || !cart) {
-    throw new Error("Missing required data: userId or cart");
+    throw new Error("Une erreur est survenue");
   }
 
   // --- CHECK AUTH ---
@@ -208,6 +207,8 @@ export const generateInvoice = async (req, res, params) => {
     });
 
     const invoiceNumber = Contents && Contents.length > 0 ? String(Object.keys(Contents).length + 1) : "1";
+
+    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
 
     // --- LOAD USER AND TEMPLATE ---
 
@@ -239,24 +240,35 @@ export const generateInvoice = async (req, res, params) => {
 
     // FUNCTION CREATION DE PAGE SUPPLEMENTAIRE
 
-    const createNewPage = () => {
-      // Get the size from the template page
-      const templatePage = pdfDoc.getPages()[0];
-      const { width, height } = templatePage.getSize();
+    const createNewPage = async () => {
+      const templatePath = path.join(process.cwd(), "public", "invoice_template.pdf");
+      const templateDoc = await PDFDocument.load(await fs.readFile(templatePath));
 
-      // Create new page with explicit dimensions
-      const newPage = pdfDoc.addPage([width, height]);
+      // Copier la première page du template
+      const [copiedPage] = await pdfDoc.copyPages(templateDoc, [0]);
 
-      // Duplicate the header on the new page
-      const drawTextNewPage = (text, options) => newPage.drawText(text, { ...globalStyle, ...options });
+      // Ajouter la page copiée au document principal
+      pdfDoc.addPage(copiedPage);
 
-      // Reproduce the header
-      drawTextNewPage(`${headerTitle} (Suite)`, { font: helveticaBold, size: 12, x: 315, y: height - 70 });
-      drawTextNewPage(dateFr, { font: helveticaBold, size: 12, x: 315, y: height - 85 });
+      const drawTextNewPage = (text, options) => copiedPage.drawText(text, { ...globalStyle, ...options });
+
+      drawTextNewPage(`${headerTitle} (Suite)`, {
+        font: helveticaBold,
+        size: 12,
+        x: 315,
+        y: copiedPage.getSize().height - 70,
+      });
+
+      drawTextNewPage(dateFr, {
+        font: helveticaBold,
+        size: 12,
+        x: 315,
+        y: copiedPage.getSize().height - 85,
+      });
 
       return {
-        page: newPage,
-        startY: height - 305,
+        page: copiedPage,
+        startY: copiedPage.getSize().height - 305,
         drawText: drawTextNewPage,
       };
     };
@@ -304,10 +316,15 @@ export const generateInvoice = async (req, res, params) => {
       // SI LA TAILLE MAX EST ATTEINTE, ON CREE UNE NOUVELLE PAGE
 
       if (y - requiredHeight < minY) {
-        const newPageData = createNewPage();
-        currentPage = newPageData.page;
-        drawText = (text, options) => currentPage.drawText(text, { ...globalStyle, ...options });
-        y = newPageData.startY;
+        try {
+          const newPageData = await createNewPage();
+          currentPage = newPageData.page;
+          drawText = newPageData.drawText; // On utilise directement la fonction drawText retournée
+          y = newPageData.startY;
+        } catch (error) {
+          console.error("Erreur lors de la création de la nouvelle page:", error);
+          throw error;
+        }
       }
 
       // INCREMENTER TOTAL PAR PRIX CONFIG UNITAIRE
@@ -322,33 +339,33 @@ export const generateInvoice = async (req, res, params) => {
 
       // CONFIG IMAGE
 
-      if (!isHttpCall) {
-        const imageBytes = await fetch(configImageSaver[configIndex])
-          .then((res) => {
-            if (!res.ok) {
-              throw new Error("Image non accessible");
-            }
-            return res.arrayBuffer();
-          })
-          .catch((error) => {
-            console.error("Erreur de téléchargement de l'image:", error);
-            return null;
-          });
+      // if (!isHttpCall) {
+      //   const imageBytes = await fetch(configImageSaver[configIndex])
+      //     .then((res) => {
+      //       if (!res.ok) {
+      //         throw new Error("Image non accessible");
+      //       }
+      //       return res.arrayBuffer();
+      //     })
+      //     .catch((error) => {
+      //       console.error("Erreur de téléchargement de l'image:", error);
+      //       return null;
+      //     });
 
-        const image = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
+      //   const image = await pdfDoc.embedJpg(new Uint8Array(imageBytes));
 
-        page.drawImage(image, {
-          x: columnPositions.configImage,
-          y: y - 67,
-          width: 75,
-          height: 75,
-        });
-      }
+      //   page.drawImage(image, {
+      //     x: columnPositions.configImage,
+      //     y: y - 67,
+      //     width: 75,
+      //     height: 75,
+      //   });
+      // }
 
       // TITLE OF THE CONFIG
       const facadeName = config.facade?.name || "N/A";
       const couleurName = config.couleur?.name || "N/A";
-      drawText(`${facadeName} - ${couleurName}`, { font: helveticaBold, size: 10, x: columnPositions.description, y });
+      drawText(`${facadeName} - ${couleurName}`, { font: helveticaBold, size: 9, x: columnPositions.description, y });
 
       // QUANTITY
       drawText(config.quantity.toString(), { x: adjustPositionForNumber(config.quantity, "quantity"), y });
@@ -368,10 +385,14 @@ export const generateInvoice = async (req, res, params) => {
 
       // DETAILS FACADE
       config.facades.forEach((facade, index) => {
-        if (["cylindres", "retros", "prises", "gravures"].some((category) => facade[category]?.length)) {
+        if (
+          ["cylindres", "retros", "variateurs", "prises", "gravures", "liseuses"].some(
+            (category) => facade[category]?.length
+          )
+        ) {
           y -= 0;
 
-          ["cylindres", "retros", "prises", "gravures"].forEach((category) => {
+          ["cylindres", "retros", "variateurs", "prises", "gravures", "liseuses"].forEach((category) => {
             facade[category]?.forEach((item) => {
               drawText(item.name, { x: columnPositions.description, y: y - 0 });
               drawText(item.quantity.toString(), { x: columnPositions.quantity, y });
@@ -416,7 +437,9 @@ export const generateInvoice = async (req, res, params) => {
 
     // --- MOYEN DE PAIEMENT ---
 
-    drawText("Carte Bancaire", { font: helveticaBold, x: 130, y: 163 });
+    if (!res) {
+      drawText("Carte Bancaire", { font: helveticaBold, x: 130, y: 163 });
+    }
 
     // --- SAVE PDF ---
 

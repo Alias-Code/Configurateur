@@ -71,13 +71,13 @@ export const saveImage = async (userId, base64Image) => {
 // --- CHECKOUT ORDER ---
 
 export const checkoutOrder = async (req, res) => {
-  const { note, selectedDelivery, selectedPayment, selectedRelayPoint, cart } = req.body;
+  const { note, formAddress, selectedDelivery, selectedPayment, selectedRelayPoint, cart } = req.body;
   const userId = req.user.userId;
 
   try {
     // --- VERIFICATIONS ---
 
-    const user = await User.findById(userId);
+    const { passwd, ...user } = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé." });
@@ -120,7 +120,7 @@ export const checkoutOrder = async (req, res) => {
           const items = [];
 
           // Parcourir les catégories pour récupérer les items
-          ["cylindres", "retros", "prises", "gravures"].forEach((category) => {
+          ["cylindres", "retros", "prises", "variateurs", "liseuses", "gravures"].forEach((category) => {
             facade[category]?.forEach((item) => {
               // Ajouter les informations de chaque item pour cette catégorie
               items.push({
@@ -160,6 +160,8 @@ export const checkoutOrder = async (req, res) => {
     for (const configuration of configurations) {
       const { configReference, configQuantity, configColor, configFacade, configImage, items } = configuration;
 
+      // POUR LA BOUCLE ON SAUVEGARDE A CHAQUE FOIS L'IMAGE ET PUSH LE RÉSULTAT (LIEN) DANS UN TABLEAU
+
       const configImageLink = await saveImage(userId, configImage);
 
       configImageSaver.push(configImageLink);
@@ -180,12 +182,13 @@ export const checkoutOrder = async (req, res) => {
       }
     }
 
-    const userInformations = await UserAddresses.findUserAddress(userId);
+    const userAddressInformations = formAddress.address ? formAddress : UserAddresses.findUserAddress(userId);
+    const userInformations = await User.findById(userId);
 
     // --- GENERATE & SAVE INVOICE ---
 
     const pdfBytes = await generateInvoice(null, null, {
-      userId: userInformations[0].id_customer,
+      userId: user.id_customer,
       orderId: orderNumber,
       configImageSaver,
       cart,
@@ -193,11 +196,11 @@ export const checkoutOrder = async (req, res) => {
 
     // --- SEND MAIL ---
 
-    await sendCheckoutMail(cart, orderData, userInformations, pdfBytes, configImageSaver);
+    await sendCheckoutMail(cart, orderData, userAddressInformations, userInformations, pdfBytes, configImageSaver);
 
     return res.status(201).json({ message: "Commande créée avec succès.", orderNumber });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Erreur serveur.", error: error.message });
+    return res.status(500).json({ message: `Erreur serveur. ${error.message}`, error: error.message });
   }
 };

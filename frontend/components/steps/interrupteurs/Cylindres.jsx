@@ -37,7 +37,7 @@ export default function Cylindres() {
 
   return (
     <Grid container>
-      <Step name="INTERRUPTEURS CYLINDRES" description="" noHr={true} category="cylindres">
+      <Step name="INTERRUPTEURS CYLINDRES" description="" noHr={true} category="cylindres" price="60">
         {cylindres.map((item, index) => (
           <Grid
             onMouseEnter={() => handleMouseOver(index)}
@@ -49,9 +49,9 @@ export default function Cylindres() {
             item
             xs={3.01}
             sm={2}
-            md={1.75}
+            md={1.8}
             lg={1.5}
-            xxl={1.25}
+            xxl={1.4}
             key={item.id}
             id={item.id}
             name={item.name}
@@ -65,7 +65,7 @@ export default function Cylindres() {
                   });
                 }
               }}
-              src={`/mecanismes/${idToImageName(item.id + "_CL-N")}.png`}
+              src={`/mecanismes/${idToImageName(item.id + "_CL-AC_P")}.png`}
               alt={item.alt}
             />
             <InterrupteursBox hoveredIndex={hoveredIndex} index={index} id={item.id} />

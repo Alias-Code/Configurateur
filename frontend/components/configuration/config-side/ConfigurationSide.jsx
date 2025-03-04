@@ -77,7 +77,7 @@ export default function ConfigurationSide() {
           {/* <div id="accountButton" className={visible ? "visible" : ""}>
             <AccountButton />
           </div> */}
-          <img id="logoVendome" src="/Vendome.png" alt="" />
+          <img id="logoVendome" src="/Vendome.webp" alt="Logo de la marque Vendôme de LUMICREA" />
         </>
       )}
 

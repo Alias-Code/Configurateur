@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
-import { ChevronRight, ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import ImagePreviewContainer from "./ImagePreviewContainer";
 import { useChoicesContext } from "../../../context/ChoicesContext";
 import QuantityButton from "../../utils/QuantityButton";
@@ -47,7 +46,6 @@ const MobileRenderPreviewContainer = styled.div`
       margin-right: 0px;
 
       img {
-        filter: invert(1);
       }
     }
   }
@@ -124,11 +122,11 @@ export default function MobileRenderPreview() {
       <div className="menuContainer">
         <ImagePreviewContainer type="mobilePreview" />
 
-        <ResizeButton>{isExpanded ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}</ResizeButton>
+        <ResizeButton>{isExpanded ? <img src="/home.svg" alt="" /> : <img src="/home.svg" alt="" />}</ResizeButton>
 
         <DetailsButton isExpanded={isExpanded} onClick={handleMenu}>
           <p>VOIR DETAILS</p>
-          <ChevronRight size={12} />
+          <img src="/home.svg" alt="" />
         </DetailsButton>
 
         {isExpanded && (

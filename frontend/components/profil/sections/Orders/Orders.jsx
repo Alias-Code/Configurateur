@@ -52,9 +52,8 @@ const OrderDetails = styled.div`
     gap: 0.3rem;
   }
 
-  svg {
-    margin-right: 0.5rem;
-    vertical-align: middle;
+  img[src*="informations"] {
+    filter: invert(1);
   }
 `;
 
@@ -89,7 +88,7 @@ export default function Commandes() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/order/getorders`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/order/getorders`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -128,7 +127,9 @@ export default function Commandes() {
 
   return (
     <>
-      <TitleStyle mb="1rem">Historique de vos commandes</TitleStyle>
+      <TitleStyle mb="1rem" fontWeight="700">
+        Historique de vos commandes
+      </TitleStyle>
       <hr />
       {userOrders.length === 0 ? (
         <EmptyMessage>
@@ -139,13 +140,28 @@ export default function Commandes() {
           {userOrders.map((order) => (
             <OrderCard key={order.order_id} onClick={() => handleOrderClick(order)}>
               <Header>
-                <TitleStyle fontSize={"0.9rem"}>Commande n°{order.order_number}</TitleStyle>
+                <TitleStyle fontSize={"0.9rem"}>Commande #{order.order_number}</TitleStyle>
                 <p>
                   Passée le <strong>{formatDate(order.order_date)}</strong>
                 </p>
               </Header>
               <OrderDetails>
-                {/* LEFT SIDE (PRICE) */}
+                {/* LEFT SIDE (DETAILS) */}
+
+                <div>
+                  <p>
+                    <img src="/informations.svg" width={16} height={16} /> <strong>Statut :</strong> {order.status}
+                  </p>
+                  <p>
+                    <img src="/shipping.svg" width={16} height={16} /> <strong>Livraison : </strong>
+                    {order.shipping_method}
+                  </p>
+                  <p>
+                    <img src="/payment.svg" width={16} height={16} /> <strong>Paiement :</strong> {order.payment_method}
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE (PRICE) */}
 
                 <div>
                   <p>
@@ -158,21 +174,6 @@ export default function Commandes() {
                     <strong>Total TTC :</strong> {order.total_amount} €
                   </p>
                 </div>
-
-                {/* RIGHT PRICE (INFORMATIONS) */}
-
-                <div>
-                  <p>
-                    <img src="/informations.svg" width={16} height={16} /> <strong>Statut :</strong> {order.status}
-                  </p>
-                  <p>
-                    <img src="/shipping.svg" width={16} height={16} /> <strong>Livraison : </strong>{" "}
-                    {order.shipping_method}
-                  </p>
-                  <p>
-                    <img src="/payment.svg" width={16} height={16} /> <strong>Paiement :</strong> {order.payment_method}
-                  </p>
-                </div>
               </OrderDetails>
             </OrderCard>
           ))}
@@ -182,7 +183,12 @@ export default function Commandes() {
       {/* ORDER DETAILS */}
 
       {showModal && (
-        <OrderInformations selectedOrder={selectedOrder} showModal={showModal} handleCloseModal={handleCloseModal} />
+        <OrderInformations
+          selectedOrder={selectedOrder}
+          orderTotalAmount={selectedOrder.total_amount}
+          showModal={showModal}
+          handleCloseModal={handleCloseModal}
+        />
       )}
     </>
   );
